@@ -1,0 +1,73 @@
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-main {
+    flex: 1;
+    padding: 0 var(--space-lg) var(--space-2xl);
+}
+
+.app-container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* New Bill Button */
+.new-bill-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-md) 0;
+    animation: fadeInUp 0.6s ease 0.4s both;
+}
+
+.new-bill-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 12px 28px;
+    background: var(--bg-glass);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: var(--font-thai);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.new-bill-btn:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary-light);
+    transform: translateY(-1px);
+}
+
+.new-bill-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Footer */
+.app-footer {
+    text-align: center;
+    padding: var(--space-xl) var(--space-md);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 600px) {
+    .app-main {
+        padding: 0 var(--space-sm) var(--space-lg);
+    }
+
+    .app-container {
+        gap: var(--space-md);
+    }
+}
