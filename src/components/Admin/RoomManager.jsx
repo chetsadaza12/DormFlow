@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAllRooms, addRoom, updateRoom, deleteRoom, getDefaultRates } from '../../data/mockData';
+import { useNotification } from '../../contexts/NotificationContext';
 import './RoomManager.css';
 
 export default function RoomManager() {
@@ -12,6 +13,12 @@ export default function RoomManager() {
         roomRent: 0, isOccupied: true
     });
     const [error, setError] = useState('');
+    const { showToast, showConfirm } = useNotification();
+
+    // Pagination & Search State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(8);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         loadData();
@@ -19,6 +26,7 @@ export default function RoomManager() {
 
     function loadData() {
         setRooms(getAllRooms());
+        // Do not reset current page here, so user stays on the page they were editing
     }
 
     function openAddModal() {
@@ -57,21 +65,51 @@ export default function RoomManager() {
         if (result.success) {
             setShowModal(false);
             loadData();
+            if (!editingRoom) {
+                // Return to first page to see the newly unshifted room
+                setCurrentPage(1);
+                setSearchTerm(''); // Clear search to ensure new room is visible
+            }
+            showToast(editingRoom ? 'อัปเดตข้อมูลห้องสำเร็จ' : 'เพิ่มห้องใหม่สำเร็จ', 'success');
         } else {
             setError(result.error);
         }
     }
 
     function handleDelete(roomNumber) {
-        if (window.confirm(`ยืนยันลบห้อง ${roomNumber}?`)) {
+        showConfirm(`ยืนยันลบห้อง ${roomNumber}?`, () => {
             const result = deleteRoom(roomNumber);
-            if (result.success) loadData();
-        }
+            if (result.success) {
+                loadData();
+                showToast(`ลบห้อง ${roomNumber} สำเร็จ`, 'success');
+            } else {
+                showToast(result.error || 'เกิดข้อผิดพลาดในการลบห้อง', 'error');
+            }
+        });
     }
 
     function handleChange(field, value) {
         setFormData(prev => ({ ...prev, [field]: value }));
     }
+
+    // ============ SEARCH & PAGINATION COMPUTATION ============
+    const filteredRooms = rooms.filter(room =>
+        room.roomNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (room.tenantName && room.tenantName.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    const totalPages = Math.ceil(filteredRooms.length / itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentRooms = filteredRooms.slice(indexOfFirstItem, indexOfLastItem);
+
+    // Reset to page 1 when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, itemsPerPage]);
+
+    // Change page
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
         <div className="room-manager" id="roomManagerPage">
@@ -80,10 +118,24 @@ export default function RoomManager() {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                     จัดการห้อง
                 </h2>
-                <button className="add-btn" onClick={openAddModal}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                    เพิ่มห้องใหม่
-                </button>
+                <div className="header-actions" style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div className="search-box glass-card" style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--text-muted)' }}>
+                            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="ค้นหาเลขห้อง หรือ ชื่อผู้เช่า..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--text-primary)', width: '200px', fontSize: '0.9rem' }}
+                        />
+                    </div>
+                    <button className="add-btn" onClick={openAddModal}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                        เพิ่มห้องใหม่
+                    </button>
+                </div>
             </div>
 
             <div className="glass-card room-table-card">
@@ -103,32 +155,93 @@ export default function RoomManager() {
                             </tr>
                         </thead>
                         <tbody>
-                            {rooms.map(room => (
-                                <tr key={room.roomNumber}>
-                                    <td className="room-cell">{room.roomNumber}</td>
-                                    <td>{room.tenantName || '-'}</td>
-                                    <td>
-                                        <span className={`status-badge ${room.isOccupied ? 'occupied' : 'vacant'}`}>
-                                            {room.isOccupied ? 'มีคนเช่า' : 'ว่าง'}
-                                        </span>
-                                    </td>
-                                    <td className="align-right">{room.lastWaterMeter.toLocaleString()}</td>
-                                    <td className="align-right">{room.lastElectricMeter.toLocaleString()}</td>
-                                    <td className="align-right">{room.waterRate}</td>
-                                    <td className="align-right">{room.electricRate}</td>
-                                    <td className="align-right">{room.roomRent.toLocaleString()}</td>
-                                    <td className="actions-col">
-                                        <button className="icon-btn edit-icon" onClick={() => openEditModal(room)} title="แก้ไข">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                                        </button>
-                                        <button className="icon-btn delete-icon" onClick={() => handleDelete(room.roomNumber)} title="ลบ">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
-                                        </button>
-                                    </td>
+                            {currentRooms.length > 0 ? (
+                                currentRooms.map(room => (
+                                    <tr key={room.roomNumber}>
+                                        <td className="room-cell">{room.roomNumber}</td>
+                                        <td>{room.tenantName || '-'}</td>
+                                        <td>
+                                            <span className={`status-badge ${room.isOccupied ? 'occupied' : 'vacant'}`}>
+                                                {room.isOccupied ? 'มีคนเช่า' : 'ว่าง'}
+                                            </span>
+                                        </td>
+                                        <td className="align-right">{room.lastWaterMeter.toLocaleString()}</td>
+                                        <td className="align-right">{room.lastElectricMeter.toLocaleString()}</td>
+                                        <td className="align-right">{room.waterRate}</td>
+                                        <td className="align-right">{room.electricRate}</td>
+                                        <td className="align-right">{room.roomRent.toLocaleString()}</td>
+                                        <td className="actions-col">
+                                            <button className="icon-btn edit-icon" onClick={() => openEditModal(room)} title="แก้ไข">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                            </button>
+                                            <button className="icon-btn delete-icon" onClick={() => handleDelete(room.roomNumber)} title="ลบ">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="9" className="text-center py-4 text-gray-400">ไม่พบข้อมูลห้อง</td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Table Footer with Items per page & Pagination */}
+                <div className="table-footer">
+                    <div className="items-per-page">
+                        <span className="items-label">แสดงทีละ:</span>
+                        <select
+                            className="input select-mini"
+                            value={itemsPerPage}
+                            onChange={(e) => {
+                                setItemsPerPage(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                        >
+                            <option value="5">5 ห้อง</option>
+                            <option value="8">8 ห้อง</option>
+                            <option value="15">15 ห้อง</option>
+                            <option value="50">50 ห้อง</option>
+                            <option value="100">100 ห้อง</option>
+                        </select>
+                    </div>
+
+                    {totalPages > 1 && (
+                        <div className="pagination-container">
+                            <button
+                                className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
+                                onClick={() => paginate(currentPage - 1)}
+                                disabled={currentPage === 1}
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+                                ก่อนหน้า
+                            </button>
+
+                            <div className="pagination-numbers">
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+                                    <button
+                                        key={num}
+                                        onClick={() => paginate(num)}
+                                        className={`pagination-num ${currentPage === num ? 'active' : ''}`}
+                                    >
+                                        {num}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button
+                                className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+                                onClick={() => paginate(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                            >
+                                ถัดไป
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 

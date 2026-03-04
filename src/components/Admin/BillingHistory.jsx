@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getBillHistory, deleteBillRecord, updateBillRecord } from '../../data/mockData';
 import { formatCurrency, calculateWaterBill, calculateElectricBill, calculateTotal } from '../../utils/calculations';
+import { useNotification } from '../../contexts/NotificationContext';
 import './BillingHistory.css';
 
 export default function BillingHistory() {
@@ -8,6 +9,7 @@ export default function BillingHistory() {
     const [searchRoom, setSearchRoom] = useState('');
     const [editingBill, setEditingBill] = useState(null);
     const [editForm, setEditForm] = useState({});
+    const { showToast, showConfirm } = useNotification();
 
     useEffect(() => {
         loadBills();
@@ -23,10 +25,11 @@ export default function BillingHistory() {
         : bills;
 
     function handleDelete(billId) {
-        if (window.confirm('ยืนยันลบบิลนี้?')) {
+        showConfirm('ยืนยันลบบิลนี้?', () => {
             deleteBillRecord(billId);
             loadBills();
-        }
+            showToast('ลบบิลสำเร็จ', 'success');
+        });
     }
 
     function openEdit(bill) {
@@ -57,14 +60,14 @@ export default function BillingHistory() {
         updateBillRecord(editingBill, {
             water: {
                 lastMeter: Number(editForm.waterLast),
-                currentMeter: Number(editForm.waterCurrent),
+                currentMeter: Number(editForm.currentMeter),
                 units: water.units,
                 rate: Number(editForm.waterRate),
                 amount: water.amount
             },
             electric: {
                 lastMeter: Number(editForm.electricLast),
-                currentMeter: Number(editForm.electricCurrent),
+                currentMeter: Number(editForm.currentMeter),
                 units: electric.units,
                 rate: Number(editForm.electricRate),
                 amount: electric.amount
@@ -77,6 +80,7 @@ export default function BillingHistory() {
 
         setEditingBill(null);
         loadBills();
+        showToast('แก้ไขข้อมูลบิลสำเร็จ', 'success');
     }
 
     return (

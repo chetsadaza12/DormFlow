@@ -131,14 +131,18 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-width: 0;
+    flex: 1;
+    container-type: inline-size;
 }
 
 .stat-number {
-    font-size: 1.65rem;
+    font-size: clamp(0.9rem, 15cqi, 1.5rem);
     font-weight: 800;
     color: var(--text-primary);
     line-height: 1.15;
     letter-spacing: -0.02em;
+    white-space: nowrap;
 }
 
 .stat-label {
@@ -339,4 +343,105 @@
 
 :root.light-theme .empty-text {
     color: var(--text-secondary);
+}
+
+/* ============ ROOM STATUS GRID ============ */
+.room-status-section {
+    padding: var(--space-xl);
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(16px);
+    margin-bottom: var(--space-2xl);
+    animation: fadeInUp 0.5s ease 0.3s both;
+}
+
+.room-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+}
+
+.room-status-card {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    transition: all 0.2s ease;
+}
+
+.room-status-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.room-status-card.occupied {
+    border-left: 3px solid #34d399;
+    /* emerald-400 equivalent for var(--accent-success) */
+}
+
+.room-status-card.vacant {
+    border-left: 3px solid #fbbf24;
+    /* amber-400 equivalent for var(--accent-warning) */
+}
+
+.room-status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room-number {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.room-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.badge-occupied {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.badge-vacant {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.room-tenant {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.room-tenant svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+}
+
+.room-tenant.empty {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+:root.light-theme .room-status-section {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+:root.light-theme .room-status-card {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.05);
 }

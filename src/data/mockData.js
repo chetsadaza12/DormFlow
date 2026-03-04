@@ -157,7 +157,7 @@ export function addRoom(roomData) {
     if (rooms.find(r => r.roomNumber === roomData.roomNumber)) {
         return { success: false, error: 'เลขห้องนี้มีอยู่แล้ว' };
     }
-    rooms.push({
+    rooms.unshift({
         roomNumber: roomData.roomNumber,
         tenantName: roomData.tenantName || '',
         lastWaterMeter: Number(roomData.lastWaterMeter) || 0,
@@ -325,6 +325,7 @@ export function getDashboardStats() {
         billsThisMonth: billsThisMonth.length,
         totalRevenue,
         monthRevenue,
-        recentBills: [...bills].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10)
+        recentBills: [...bills].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10),
+        roomsList: rooms.map(r => ({ roomNumber: r.roomNumber, isOccupied: r.isOccupied, tenantName: r.tenantName }))
     };
 }

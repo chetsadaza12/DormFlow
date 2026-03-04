@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getDefaultRates, setDefaultRates, getAllRooms, applyRatesToAllRooms, updateRoom } from '../../data/mockData';
+import { useNotification } from '../../contexts/NotificationContext';
 import './PricingSettings.css';
 
 export default function PricingSettings() {
     const [rates, setRates] = useState({ waterRate: 18, electricRate: 8 });
     const [rooms, setRooms] = useState([]);
-    const [saved, setSaved] = useState('');
+    const { showToast, showConfirm } = useNotification();
 
     useEffect(() => {
         setRates(getDefaultRates());
@@ -14,17 +15,15 @@ export default function PricingSettings() {
 
     function handleSaveDefault() {
         setDefaultRates(rates);
-        setSaved('บันทึกราคาเริ่มต้นแล้ว ✓');
-        setTimeout(() => setSaved(''), 2000);
+        showToast('บันทึกราคาเริ่มต้นแล้ว', 'success');
     }
 
     function handleApplyAll() {
-        if (window.confirm('ยืนยัน: ปรับราคาน้ำและไฟทุกห้องตามค่าเริ่มต้นนี้?')) {
+        showConfirm('ยืนยัน: ปรับราคาน้ำและไฟทุกห้องตามค่าเริ่มต้นนี้?', () => {
             applyRatesToAllRooms(rates);
             setRooms(getAllRooms());
-            setSaved('ปรับราคาทุกห้องแล้ว ✓');
-            setTimeout(() => setSaved(''), 2000);
-        }
+            showToast('ปรับราคาทุกห้องแล้ว', 'success');
+        });
     }
 
     function handleRoomRateChange(roomNumber, field, value) {
@@ -61,7 +60,6 @@ export default function PricingSettings() {
                         <button className="apply-all-btn" onClick={handleApplyAll}>Apply All ทุกห้อง</button>
                     </div>
                 </div>
-                {saved && <p className="saved-msg">{saved}</p>}
             </div>
 
             {/* Per-Room Rates */}
