@@ -1,0 +1,18 @@
+import express from 'express';
+import * as settingsController from '../controllers/settingsController.js';
+
+const router = express.Router();
+
+// GET /api/settings - ดึงการตั้งค่าทั้งหมด
+router.get('/', settingsController.getSettings);
+
+// PUT /api/settings - บันทึกการตั้งค่า
+router.put('/', settingsController.updateSettings);
+
+// GET /api/settings/rates - ดึงอัตราค่าบริการ
+router.get('/rates', settingsController.getRates);
+
+// PUT /api/settings/rates - อัพเดตอัตราค่าบริการ
+router.put('/rates', settingsController.updateRates);
+
+export default router;
