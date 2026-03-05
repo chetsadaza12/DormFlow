@@ -1,18 +1,55 @@
-/**
- * Settings Model Schema
- * TODO: ใช้ ORM/ODM ตามฐานข้อมูลที่เลือก
- * 
- * Fields:
- * - key (String, unique, required) - ชื่อ setting
- * - value (String) - ค่า setting
- * 
- * Default Settings:
- * - invoiceTitle: "บิลค่าเช่าห้องแถว นรสิงห์"
- * - headerSubtitle: "Narasing Billing System"
- * - paymentNote: "ชำระเงินทุกวันที่ 5..."
- * - contactInfo: "ช่องทางการติดต่อ..."
- * - waterRate: 18
- * - electricRate: 8
- */
+import mongoose from 'mongoose';
 
-export default {};
+const settingsSchema = new mongoose.Schema({
+    key: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    value: {
+        type: mongoose.Schema.Types.Mixed,
+        default: ''
+    }
+}, {
+    timestamps: true
+});
+
+// Default settings values
+settingsSchema.statics.defaults = {
+    businessName: 'นรสิงห์',
+    invoiceTitle: 'บิลค่าเช่าห้องแถว นรสิงห์',
+    headerSubtitle: 'Narasing Billing System',
+    paymentNote: 'ชำระเงินทุกวันที่ 5 ของทุกเดือนหรือเกินกำหนดวันชำระนั้นๆ ปรับเพิ่มวันละ 100 บาท',
+    contactInfo: 'ช่องทางการติดต่อ สอบถาม 092-5152-870 โก้ / 082-508-8909 พอล',
+    waterRate: 18,
+    electricRate: 8
+};
+
+// Get all settings as a flat object
+settingsSchema.statics.getAll = async function () {
+    const docs = await this.find({});
+    const result = { ...this.defaults };
+    docs.forEach(doc => {
+        result[doc.key] = doc.value;
+    });
+    return result;
+};
+
+// Set multiple settings at once
+settingsSchema.statics.setMultiple = async function (settings) {
+    const ops = Object.entries(settings).map(([key, value]) => ({
+        updateOne: {
+            filter: { key },
+            update: { key, value },
+            upsert: true
+        }
+    }));
+    if (ops.length > 0) {
+        await this.bulkWrite(ops);
+    }
+    return this.getAll();
+};
+
+const Settings = mongoose.model('Settings', settingsSchema);
+export default Settings;

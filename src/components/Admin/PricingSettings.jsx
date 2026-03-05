@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getDefaultRates, setDefaultRates, getAllRooms, applyRatesToAllRooms, updateRoom } from '../../data/mockData';
+import { settingsAPI, roomAPI } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
 import './PricingSettings.css';
 
@@ -9,26 +9,51 @@ export default function PricingSettings() {
     const { showToast, showConfirm } = useNotification();
 
     useEffect(() => {
-        setRates(getDefaultRates());
-        setRooms(getAllRooms());
+        async function loadData() {
+            try {
+                const [ratesData, roomsData] = await Promise.all([
+                    settingsAPI.getRates(),
+                    roomAPI.getAll()
+                ]);
+                setRates(ratesData);
+                setRooms(roomsData);
+            } catch (error) {
+                showToast('ไม่สามารถดึงข้อมูลตั้งราคาได้', 'error');
+            }
+        }
+        loadData();
     }, []);
 
-    function handleSaveDefault() {
-        setDefaultRates(rates);
-        showToast('บันทึกราคาเริ่มต้นแล้ว', 'success');
+    async function handleSaveDefault() {
+        try {
+            await settingsAPI.updateRates(rates);
+            showToast('บันทึกราคาเริ่มต้นแล้ว', 'success');
+        } catch (error) {
+            showToast(error.message || 'เกิดข้อผิดพลาดในการบันทึกราคาเริ่มต้น', 'error');
+        }
     }
 
     function handleApplyAll() {
-        showConfirm('ยืนยัน: ปรับราคาน้ำและไฟทุกห้องตามค่าเริ่มต้นนี้?', () => {
-            applyRatesToAllRooms(rates);
-            setRooms(getAllRooms());
-            showToast('ปรับราคาทุกห้องแล้ว', 'success');
+        showConfirm('ยืนยัน: ปรับราคาน้ำและไฟทุกห้องตามค่าเริ่มต้นนี้?', async () => {
+            try {
+                const currentRooms = await settingsAPI.applyRatesToAllRooms(rates);
+                setRooms(currentRooms);
+                showToast('ปรับราคาทุกห้องแล้ว', 'success');
+            } catch (error) {
+                showToast(error.message || 'เกิดข้อผิดพลาดในการปรับราคา', 'error');
+            }
         });
     }
 
-    function handleRoomRateChange(roomNumber, field, value) {
-        updateRoom(roomNumber, { [field]: value === '' ? '' : Number(value) });
-        setRooms(getAllRooms());
+    async function handleRoomRateChange(roomNumber, field, value) {
+        try {
+            const updates = { [field]: value === '' ? '' : Number(value) };
+            await roomAPI.update(roomNumber, updates);
+            const data = await roomAPI.getAll();
+            setRooms(data);
+        } catch (error) {
+            showToast(error.message || 'เกิดข้อผิดพลาดในการปรับราคาห้อง', 'error');
+        }
     }
 
     return (

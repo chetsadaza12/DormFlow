@@ -1,28 +1,50 @@
-import { useState } from 'react';
-import { getSettings, saveSettingsData } from '../../data/mockData';
+import { useState, useEffect } from 'react';
+import { settingsAPI } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
 import './GeneralSettings.css';
 
 export default function GeneralSettings() {
     const { showToast } = useNotification();
-    const [settings, setSettings] = useState(() => getSettings());
+    const [settings, setSettings] = useState(null);
     const [hasChanges, setHasChanges] = useState(false);
+
+    useEffect(() => {
+        async function loadSettings() {
+            try {
+                const data = await settingsAPI.get();
+                setSettings(data);
+            } catch (error) {
+                showToast('ไม่สามารถโหลดการตั้งค่าได้', 'error');
+            }
+        }
+        loadSettings();
+    }, []);
+
+    if (!settings) return null;
 
     function handleChange(key, value) {
         setSettings(prev => ({ ...prev, [key]: value }));
         setHasChanges(true);
     }
 
-    function handleSave() {
-        saveSettingsData(settings);
-        setHasChanges(false);
-        showToast('บันทึกการตั้งค่าเรียบร้อยแล้ว', 'success');
+    async function handleSave() {
+        try {
+            await settingsAPI.update(settings);
+            setHasChanges(false);
+            showToast('บันทึกการตั้งค่าเรียบร้อยแล้ว', 'success');
+        } catch (error) {
+            showToast(error.message || 'เกิดข้อผิดพลาดในการบันทึกการตั้งค่า', 'error');
+        }
     }
 
-    function handleReset() {
-        const fresh = getSettings();
-        setSettings(fresh);
-        setHasChanges(false);
+    async function handleReset() {
+        try {
+            const fresh = await settingsAPI.get();
+            setSettings(fresh);
+            setHasChanges(false);
+        } catch (error) {
+            showToast('ไม่สามารถดึงข้อมูลตั้งค่าใหม่ได้', 'error');
+        }
     }
 
     const fields = [

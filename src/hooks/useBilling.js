@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { getRoomByNumber, updateRoomMeters, saveBillRecord } from '../data/mockData';
+import { roomAPI, billAPI } from '../services/api';
 import { calculateWaterBill, calculateElectricBill, calculateTotal } from '../utils/calculations';
 
 /**
@@ -21,7 +21,7 @@ export function useBilling() {
     /**
      * ค้นหาข้อมูลห้อง
      */
-    const searchRoom = useCallback((number) => {
+    const searchRoom = useCallback(async (number) => {
         const num = number || roomNumber;
         if (!num.trim()) {
             setError('กรุณากรอกเลขห้อง');
@@ -37,18 +37,18 @@ export function useBilling() {
         setCurrentFineNote('');
         setIsBillSaved(false);
 
-        // จำลอง delay เล็กน้อยเหมือนดึงจากฐานข้อมูล
-        setTimeout(() => {
-            const room = getRoomByNumber(num);
+        try {
+            const room = await roomAPI.getByNumber(num);
             if (room) {
                 setRoomData(room);
                 setError('');
-            } else {
-                setRoomData(null);
-                setError(`ไม่พบข้อมูลห้อง "${num}"`);
             }
+        } catch (err) {
+            setRoomData(null);
+            setError(err.message || `ไม่พบข้อมูลห้อง "${num}"`);
+        } finally {
             setIsSearching(false);
-        }, 300);
+        }
     }, [roomNumber]);
 
     /**
@@ -122,23 +122,24 @@ export function useBilling() {
     /**
      * บันทึกบิลและอัพเดตมิเตอร์
      */
-    const saveBill = useCallback(() => {
+    const saveBill = useCallback(async () => {
         if (!billingResult) return false;
 
-        // บันทึกประวัติบิล
-        const saved = saveBillRecord(billingResult);
+        try {
+            await billAPI.create(billingResult);
 
-        // อัพเดตเลขมิเตอร์เป็นเดือนล่าสุด
-        if (saved) {
-            updateRoomMeters(
+            await roomAPI.updateMeters(
                 billingResult.roomNumber,
                 billingResult.water.currentMeter,
                 billingResult.electric.currentMeter
             );
-            setIsBillSaved(true);
-        }
 
-        return saved;
+            setIsBillSaved(true);
+            return true;
+        } catch (err) {
+            setError(err.message || 'เกิดข้อผิดพลาดในการบันทึกบิล');
+            return false;
+        }
     }, [billingResult]);
 
     /**

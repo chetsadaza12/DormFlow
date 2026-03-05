@@ -15,4 +15,7 @@ router.get('/rates', settingsController.getRates);
 // PUT /api/settings/rates - อัพเดตอัตราค่าบริการ
 router.put('/rates', settingsController.updateRates);
 
+// PUT /api/settings/rates/apply-all - ใช้อัตราค่าบริการกับทุกห้อง
+router.put('/rates/apply-all', settingsController.applyRatesToAllRooms);
+
 export default router;

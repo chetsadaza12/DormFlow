@@ -1,13 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import { formatShortDate } from '../../utils/calculations';
-import { getSettings } from '../../data/mockData';
+import { settingsAPI } from '../../services/api';
 import './PrintInvoice.css';
 
 export default function PrintInvoice({ billingResult, onClose }) {
     const [isSaving, setIsSaving] = useState(false);
     const paperRef = useRef(null);
-    const settings = getSettings();
+    const [settings, setSettings] = useState(null);
+
+    useEffect(() => {
+        async function loadSettings() {
+            try {
+                const data = await settingsAPI.get();
+                setSettings(data);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        loadSettings();
+    }, []);
 
     // Dynamically scale the invoice paper to fit the viewport on mobile
     useEffect(() => {
@@ -42,7 +54,7 @@ export default function PrintInvoice({ billingResult, onClose }) {
         return () => window.removeEventListener('resize', updateScale);
     }, [billingResult]);
 
-    if (!billingResult) return null;
+    if (!billingResult || !settings) return null;
 
     function handlePrint() {
         window.print();

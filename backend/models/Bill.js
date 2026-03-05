@@ -1,29 +1,60 @@
-/**
- * Bill Model Schema
- * TODO: ใช้ ORM/ODM ตามฐานข้อมูลที่เลือก
- * 
- * Fields:
- * - roomNumber (String, required) - เลขห้อง
- * - tenantName (String) - ชื่อผู้เช่า
- * - billingDate (Date) - วันที่ออกบิล
- * - water (Object)
- *     - lastMeter (Number)
- *     - currentMeter (Number)
- *     - units (Number)
- *     - rate (Number)
- *     - amount (Number)
- * - electric (Object)
- *     - lastMeter (Number)
- *     - currentMeter (Number)
- *     - units (Number)
- *     - rate (Number)
- *     - amount (Number)
- * - fineAmount (Number) - ค่าปรับ
- * - fineNote (String) - หมายเหตุค่าปรับ
- * - roomRent (Number) - ค่าเช่า
- * - total (Number) - ยอดรวม
- * - createdAt (Date)
- * - updatedAt (Date)
- */
+import mongoose from 'mongoose';
 
-export default {};
+const meterSubSchema = new mongoose.Schema({
+    lastMeter: { type: Number, default: 0 },
+    currentMeter: { type: Number, default: 0 },
+    units: { type: Number, default: 0 },
+    rate: { type: Number, default: 0 },
+    amount: { type: Number, default: 0 }
+}, { _id: false });
+
+const billSchema = new mongoose.Schema({
+    roomNumber: {
+        type: String,
+        required: [true, 'กรุณาระบุเลขห้อง'],
+        trim: true
+    },
+    tenantName: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    billingDate: {
+        type: Date,
+        default: Date.now
+    },
+    water: {
+        type: meterSubSchema,
+        default: () => ({})
+    },
+    electric: {
+        type: meterSubSchema,
+        default: () => ({})
+    },
+    fineAmount: {
+        type: Number,
+        default: 0
+    },
+    fineNote: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    roomRent: {
+        type: Number,
+        default: 0
+    },
+    total: {
+        type: Number,
+        default: 0
+    }
+}, {
+    timestamps: true
+});
+
+// Index for fast queries
+billSchema.index({ roomNumber: 1, createdAt: -1 });
+billSchema.index({ createdAt: -1 });
+
+const Bill = mongoose.model('Bill', billSchema);
+export default Bill;

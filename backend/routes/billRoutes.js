@@ -18,6 +18,9 @@ router.post('/', billController.createBill);
 // PUT /api/bills/:id - แก้ไขบิล
 router.put('/:id', billController.updateBill);
 
+// DELETE /api/bills/bulk - ลบหลายบิล
+router.delete('/bulk', billController.deleteMultipleBills);
+
 // DELETE /api/bills/:id - ลบบิล
 router.delete('/:id', billController.deleteBill);
 

@@ -1,62 +1,92 @@
-// Room Controller
-// TODO: เชื่อมต่อกับฐานข้อมูลจริง
+import Room from '../models/Room.js';
 
+// GET /api/rooms
 export const getAllRooms = async (req, res) => {
     try {
-        // TODO: ดึงข้อมูลจาก DB
-        res.json({ message: 'GET all rooms - TODO' });
+        const rooms = await Room.find({}).sort({ roomNumber: 1 });
+        res.json(rooms);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// GET /api/rooms/:roomNumber
 export const getRoomByNumber = async (req, res) => {
     try {
-        const { roomNumber } = req.params;
-        // TODO: ดึงข้อมูลจาก DB
-        res.json({ message: `GET room ${roomNumber} - TODO` });
+        const room = await Room.findOne({ roomNumber: req.params.roomNumber });
+        if (!room) {
+            return res.status(404).json({ error: 'ไม่พบห้องนี้' });
+        }
+        res.json(room);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// POST /api/rooms
 export const createRoom = async (req, res) => {
     try {
-        const roomData = req.body;
-        // TODO: บันทึกลง DB
-        res.status(201).json({ message: 'Room created - TODO', data: roomData });
+        const existing = await Room.findOne({ roomNumber: req.body.roomNumber });
+        if (existing) {
+            return res.status(400).json({ error: 'เลขห้องนี้มีอยู่แล้ว' });
+        }
+        const room = await Room.create(req.body);
+        res.status(201).json(room);
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ error: 'เลขห้องนี้มีอยู่แล้ว' });
+        }
         res.status(500).json({ error: error.message });
     }
 };
 
+// PUT /api/rooms/:roomNumber
 export const updateRoom = async (req, res) => {
     try {
-        const { roomNumber } = req.params;
-        const updates = req.body;
-        // TODO: อัพเดตใน DB
-        res.json({ message: `Room ${roomNumber} updated - TODO`, data: updates });
+        const room = await Room.findOneAndUpdate(
+            { roomNumber: req.params.roomNumber },
+            req.body,
+            { new: true, runValidators: true }
+        );
+        if (!room) {
+            return res.status(404).json({ error: 'ไม่พบห้องนี้' });
+        }
+        res.json(room);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// DELETE /api/rooms/:roomNumber
 export const deleteRoom = async (req, res) => {
     try {
-        const { roomNumber } = req.params;
-        // TODO: ลบจาก DB
-        res.json({ message: `Room ${roomNumber} deleted - TODO` });
+        const room = await Room.findOneAndDelete({ roomNumber: req.params.roomNumber });
+        if (!room) {
+            return res.status(404).json({ error: 'ไม่พบห้องนี้' });
+        }
+        res.json({ message: 'ลบห้องสำเร็จ', room });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// PUT /api/rooms/:roomNumber/meters
 export const updateMeters = async (req, res) => {
     try {
-        const { roomNumber } = req.params;
         const { waterMeter, electricMeter } = req.body;
-        // TODO: อัพเดตมิเตอร์ใน DB
-        res.json({ message: `Meters updated for room ${roomNumber} - TODO` });
+        const room = await Room.findOneAndUpdate(
+            { roomNumber: req.params.roomNumber },
+            {
+                lastWaterMeter: waterMeter,
+                lastElectricMeter: electricMeter,
+                lastBillingDate: new Date()
+            },
+            { new: true }
+        );
+        if (!room) {
+            return res.status(404).json({ error: 'ไม่พบห้องนี้' });
+        }
+        res.json(room);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

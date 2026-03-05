@@ -1,19 +1,51 @@
-/**
- * Room Model Schema
- * TODO: ใช้ ORM/ODM ตามฐานข้อมูลที่เลือก
- * 
- * Fields:
- * - roomNumber (String, unique, required) - เลขห้อง
- * - tenantName (String) - ชื่อผู้เช่า
- * - lastWaterMeter (Number) - เลขมิเตอร์น้ำล่าสุด
- * - lastElectricMeter (Number) - เลขมิเตอร์ไฟล่าสุด
- * - waterRate (Number) - อัตราค่าน้ำต่อหน่วย
- * - electricRate (Number) - อัตราค่าไฟต่อหน่วย
- * - roomRent (Number) - ค่าเช่าห้อง
- * - lastBillingDate (Date) - วันที่ออกบิลล่าสุด
- * - isOccupied (Boolean) - สถานะมีคนเช่าหรือไม่
- * - createdAt (Date)
- * - updatedAt (Date)
- */
+import mongoose from 'mongoose';
 
-export default {};
+const roomSchema = new mongoose.Schema({
+    roomNumber: {
+        type: String,
+        required: [true, 'กรุณาระบุเลขห้อง'],
+        unique: true,
+        trim: true
+    },
+    tenantName: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    lastWaterMeter: {
+        type: Number,
+        default: 0
+    },
+    lastElectricMeter: {
+        type: Number,
+        default: 0
+    },
+    waterRate: {
+        type: Number,
+        default: 18
+    },
+    electricRate: {
+        type: Number,
+        default: 8
+    },
+    roomRent: {
+        type: Number,
+        default: 0
+    },
+    lastBillingDate: {
+        type: Date,
+        default: null
+    },
+    isOccupied: {
+        type: Boolean,
+        default: true
+    }
+}, {
+    timestamps: true
+});
+
+// Sort by roomNumber by default
+roomSchema.index({ roomNumber: 1 });
+
+const Room = mongoose.model('Room', roomSchema);
+export default Room;

@@ -1,10 +1,23 @@
+import { useState, useEffect } from 'react';
 import { formatThaiDate } from '../../utils/calculations';
-import { getSettings } from '../../data/mockData';
+import { settingsAPI } from '../../services/api';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import './Header.css';
 
 export default function Header() {
-    const settings = getSettings();
+    const [settings, setSettings] = useState({ headerSubtitle: 'กำลังโหลด...' });
+
+    useEffect(() => {
+        async function loadSettings() {
+            try {
+                const data = await settingsAPI.get();
+                setSettings(data);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        loadSettings();
+    }, []);
 
     return (
         <header className="header" id="mainHeader">

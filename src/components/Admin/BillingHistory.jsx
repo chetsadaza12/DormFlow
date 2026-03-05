@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getBillHistory, deleteBillRecord, updateBillRecord, deleteMultipleBillRecords } from '../../data/mockData';
+import { billAPI } from '../../services/api';
 import { formatCurrency, calculateWaterBill, calculateElectricBill, calculateTotal } from '../../utils/calculations';
 import { exportToCSV, exportToExcel } from '../../utils/exportBills';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -17,9 +17,13 @@ export default function BillingHistory() {
         loadBills();
     }, []);
 
-    function loadBills() {
-        const all = getBillHistory();
-        setBills([...all].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+    async function loadBills() {
+        try {
+            const all = await billAPI.getAll();
+            setBills([...all].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+        } catch (error) {
+            showToast('ไม่สามารถดึงประวัติบิลได้', 'error');
+        }
     }
 
     const filteredBills = searchRoom.trim()
@@ -27,11 +31,15 @@ export default function BillingHistory() {
         : bills;
 
     function handleDelete(billId) {
-        showConfirm('ยืนยันลบบิลนี้?', () => {
-            deleteBillRecord(billId);
-            loadBills();
-            setSelectedBills(prev => prev.filter(id => id !== billId));
-            showToast('ลบบิลสำเร็จ', 'success');
+        showConfirm('ยืนยันลบบิลนี้?', async () => {
+            try {
+                await billAPI.delete(billId);
+                loadBills();
+                setSelectedBills(prev => prev.filter(id => id !== billId));
+                showToast('ลบบิลสำเร็จ', 'success');
+            } catch (error) {
+                showToast(error.message || 'เกิดข้อผิดพลาดในการลบบิล', 'error');
+            }
         });
     }
 
@@ -45,22 +53,26 @@ export default function BillingHistory() {
         if (selectedBills.length === filteredBills.length && filteredBills.length > 0) {
             setSelectedBills([]);
         } else {
-            setSelectedBills(filteredBills.map(b => b.id));
+            setSelectedBills(filteredBills.map(b => b._id));
         }
     }
 
     function handleBulkDelete() {
         if (selectedBills.length === 0) return;
-        showConfirm(`ยืนยันลบบิลที่เลือกทั้งหมด ${selectedBills.length} รายการ?`, () => {
-            deleteMultipleBillRecords(selectedBills);
-            loadBills();
-            setSelectedBills([]);
-            showToast('ลบบิลสำเร็จ', 'success');
+        showConfirm(`ยืนยันลบบิลที่เลือกทั้งหมด ${selectedBills.length} รายการ?`, async () => {
+            try {
+                await billAPI.deleteMultiple(selectedBills);
+                loadBills();
+                setSelectedBills([]);
+                showToast('ลบบิลสำเร็จ', 'success');
+            } catch (error) {
+                showToast(error.message || 'เกิดข้อผิดพลาดในการลบบิล', 'error');
+            }
         });
     }
 
     function openEdit(bill) {
-        setEditingBill(bill.id);
+        setEditingBill(bill._id);
         setEditForm({
             waterCurrent: bill.water?.currentMeter || 0,
             waterLast: bill.water?.lastMeter || 0,
@@ -74,7 +86,7 @@ export default function BillingHistory() {
         });
     }
 
-    function handleSaveEdit() {
+    async function handleSaveEdit() {
         const water = calculateWaterBill(
             Number(editForm.waterCurrent), Number(editForm.waterLast), Number(editForm.waterRate)
         );
@@ -84,30 +96,34 @@ export default function BillingHistory() {
         const fineAmt = Number(editForm.fineAmount) || 0;
         const total = calculateTotal(water.amount, electric.amount, Number(editForm.roomRent), fineAmt);
 
-        updateBillRecord(editingBill, {
-            water: {
-                lastMeter: Number(editForm.waterLast),
-                currentMeter: Number(editForm.currentMeter),
-                units: water.units,
-                rate: Number(editForm.waterRate),
-                amount: water.amount
-            },
-            electric: {
-                lastMeter: Number(editForm.electricLast),
-                currentMeter: Number(editForm.currentMeter),
-                units: electric.units,
-                rate: Number(editForm.electricRate),
-                amount: electric.amount
-            },
-            fineAmount: fineAmt,
-            fineNote: editForm.fineNote,
-            roomRent: Number(editForm.roomRent),
-            total
-        });
+        try {
+            await billAPI.update(editingBill, {
+                water: {
+                    lastMeter: Number(editForm.waterLast),
+                    currentMeter: Number(editForm.waterCurrent),
+                    units: water.units,
+                    rate: Number(editForm.waterRate),
+                    amount: water.amount
+                },
+                electric: {
+                    lastMeter: Number(editForm.electricLast),
+                    currentMeter: Number(editForm.electricCurrent),
+                    units: electric.units,
+                    rate: Number(editForm.electricRate),
+                    amount: electric.amount
+                },
+                fineAmount: fineAmt,
+                fineNote: editForm.fineNote,
+                roomRent: Number(editForm.roomRent),
+                total
+            });
 
-        setEditingBill(null);
-        loadBills();
-        showToast('แก้ไขข้อมูลบิลสำเร็จ', 'success');
+            setEditingBill(null);
+            loadBills();
+            showToast('แก้ไขข้อมูลบิลสำเร็จ', 'success');
+        } catch (error) {
+            showToast(error.message || 'เกิดข้อผิดพลาดในการแก้ไขบิล', 'error');
+        }
     }
 
     return (
@@ -163,9 +179,9 @@ export default function BillingHistory() {
                 <div className="bills-list">
                     {filteredBills.map(bill => (
                         <div
-                            className={`bill-card glass-card ${selectedBills.includes(bill.id) ? 'selected' : ''}`}
-                            key={bill.id}
-                            onClick={() => handleToggleSelect(bill.id)}
+                            className={`bill-card glass-card ${selectedBills.includes(bill._id) ? 'selected' : ''}`}
+                            key={bill._id}
+                            onClick={() => handleToggleSelect(bill._id)}
                             style={{ cursor: 'pointer' }}
                         >
                             <div className="bill-card-header">
@@ -210,14 +226,14 @@ export default function BillingHistory() {
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                     แก้ไข
                                 </button>
-                                <button className="icon-btn delete-icon" onClick={(e) => { e.stopPropagation(); handleDelete(bill.id); }} title="ลบ">
+                                <button className="icon-btn delete-icon" onClick={(e) => { e.stopPropagation(); handleDelete(bill._id); }} title="ลบ">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
                                     ลบ
                                 </button>
                             </div>
 
                             {/* Inline Edit */}
-                            {editingBill === bill.id && (
+                            {editingBill === bill._id && (
                                 <div className="edit-section" onClick={(e) => e.stopPropagation()}>
                                     <h4 className="edit-title">แก้ไขบิล</h4>
                                     <div className="edit-grid">

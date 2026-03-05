@@ -1,11 +1,23 @@
-import { useState } from 'react';
-import { getAllRooms } from '../../data/mockData';
+import { useState, useEffect } from 'react';
+import { roomAPI } from '../../services/api';
 import { formatCurrency } from '../../utils/calculations';
 import './RoomSearch.css';
 
 export default function RoomSearch({ roomNumber, setRoomNumber, onSearch, roomData, isSearching, error }) {
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const allRooms = getAllRooms();
+    const [allRooms, setAllRooms] = useState([]);
+
+    useEffect(() => {
+        async function fetchRooms() {
+            try {
+                const rooms = await roomAPI.getAll();
+                setAllRooms(rooms);
+            } catch (err) {
+                console.error('Failed to load rooms for search');
+            }
+        }
+        fetchRooms();
+    }, []);
 
     const filteredRooms = allRooms.filter(r =>
         r.roomNumber.includes(roomNumber)

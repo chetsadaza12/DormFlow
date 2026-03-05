@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getDashboardStats } from '../../data/mockData';
+import { billAPI } from '../../services/api';
 import { formatCurrency } from '../../utils/calculations';
 import './Dashboard.css';
 
@@ -7,7 +7,15 @@ export default function Dashboard() {
     const [stats, setStats] = useState(null);
 
     useEffect(() => {
-        setStats(getDashboardStats());
+        async function fetchStats() {
+            try {
+                const data = await billAPI.getDashboardStats();
+                setStats(data);
+            } catch (error) {
+                console.error('Failed to load dashboard stats:', error);
+            }
+        }
+        fetchStats();
     }, []);
 
     if (!stats) return null;

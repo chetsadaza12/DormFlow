@@ -1,61 +1,123 @@
-// Bill Controller
-// TODO: เชื่อมต่อกับฐานข้อมูลจริง
+import Bill from '../models/Bill.js';
+import Room from '../models/Room.js';
 
+// GET /api/bills
 export const getAllBills = async (req, res) => {
     try {
-        const { room } = req.query;
-        // TODO: ดึงจาก DB (filter by room if provided)
-        res.json({ message: 'GET all bills - TODO', filter: { room } });
+        const filter = {};
+        if (req.query.room) {
+            filter.roomNumber = req.query.room;
+        }
+        const bills = await Bill.find(filter).sort({ createdAt: -1 });
+        res.json(bills);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// GET /api/bills/:id
 export const getBillById = async (req, res) => {
     try {
-        const { id } = req.params;
-        // TODO: ดึงจาก DB
-        res.json({ message: `GET bill ${id} - TODO` });
+        const bill = await Bill.findById(req.params.id);
+        if (!bill) {
+            return res.status(404).json({ error: 'ไม่พบบิลนี้' });
+        }
+        res.json(bill);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// POST /api/bills
 export const createBill = async (req, res) => {
     try {
-        const billData = req.body;
-        // TODO: บันทึกลง DB
-        res.status(201).json({ message: 'Bill created - TODO', data: billData });
+        const bill = await Bill.create(req.body);
+        res.status(201).json(bill);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// PUT /api/bills/:id
 export const updateBill = async (req, res) => {
     try {
-        const { id } = req.params;
-        const updates = req.body;
-        // TODO: อัพเดตใน DB
-        res.json({ message: `Bill ${id} updated - TODO`, data: updates });
+        const bill = await Bill.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+        if (!bill) {
+            return res.status(404).json({ error: 'ไม่พบบิลนี้' });
+        }
+        res.json(bill);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// DELETE /api/bills/:id
 export const deleteBill = async (req, res) => {
     try {
-        const { id } = req.params;
-        // TODO: ลบจาก DB
-        res.json({ message: `Bill ${id} deleted - TODO` });
+        const bill = await Bill.findByIdAndDelete(req.params.id);
+        if (!bill) {
+            return res.status(404).json({ error: 'ไม่พบบิลนี้' });
+        }
+        res.json({ message: 'ลบบิลสำเร็จ', bill });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// DELETE /api/bills (body: { ids: [...] })
+export const deleteMultipleBills = async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'กรุณาระบุ IDs ของบิลที่ต้องการลบ' });
+        }
+        const result = await Bill.deleteMany({ _id: { $in: ids } });
+        res.json({ message: `ลบบิลสำเร็จ ${result.deletedCount} รายการ`, deletedCount: result.deletedCount });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// GET /api/bills/stats/dashboard
 export const getDashboardStats = async (req, res) => {
     try {
-        // TODO: คำนวณสถิติจาก DB
-        res.json({ message: 'Dashboard stats - TODO' });
+        const rooms = await Room.find({});
+        const bills = await Bill.find({});
+
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        const billsThisMonth = bills.filter(b => {
+            const d = new Date(b.createdAt);
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        });
+
+        const totalRevenue = bills.reduce((sum, b) => sum + (b.total || 0), 0);
+        const monthRevenue = billsThisMonth.reduce((sum, b) => sum + (b.total || 0), 0);
+
+        const occupiedRooms = rooms.filter(r => r.isOccupied).length;
+        const vacantRooms = rooms.filter(r => !r.isOccupied).length;
+
+        res.json({
+            totalRooms: rooms.length,
+            occupiedRooms,
+            vacantRooms,
+            totalBills: bills.length,
+            billsThisMonth: billsThisMonth.length,
+            totalRevenue,
+            monthRevenue,
+            recentBills: [...bills].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10),
+            roomsList: rooms.map(r => ({
+                roomNumber: r.roomNumber,
+                isOccupied: r.isOccupied,
+                tenantName: r.tenantName
+            }))
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

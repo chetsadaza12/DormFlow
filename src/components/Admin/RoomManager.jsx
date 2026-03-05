@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllRooms, addRoom, updateRoom, deleteRoom, getDefaultRates } from '../../data/mockData';
+import { roomAPI, settingsAPI } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
 import './RoomManager.css';
 
@@ -24,21 +24,29 @@ export default function RoomManager() {
         loadData();
     }, []);
 
-    function loadData() {
-        setRooms(getAllRooms());
-        // Do not reset current page here, so user stays on the page they were editing
+    async function loadData() {
+        try {
+            const data = await roomAPI.getAll();
+            setRooms(data);
+        } catch (err) {
+            showToast(err.message || 'ไม่สามารถโหลดข้อมูลห้องได้', 'error');
+        }
     }
 
-    function openAddModal() {
-        const rates = getDefaultRates();
-        setEditingRoom(null);
-        setFormData({
-            roomNumber: '', tenantName: '', lastWaterMeter: 0,
-            lastElectricMeter: 0, waterRate: rates.waterRate, electricRate: rates.electricRate,
-            roomRent: 0, isOccupied: true
-        });
-        setError('');
-        setShowModal(true);
+    async function openAddModal() {
+        try {
+            const rates = await settingsAPI.getRates();
+            setEditingRoom(null);
+            setFormData({
+                roomNumber: '', tenantName: '', lastWaterMeter: 0,
+                lastElectricMeter: 0, waterRate: rates.waterRate, electricRate: rates.electricRate,
+                roomRent: 0, isOccupied: true
+            });
+            setError('');
+            setShowModal(true);
+        } catch (err) {
+            showToast('ไม่สามารถดึงอัตราค่าบริการเริ่มต้นได้', 'error');
+        }
     }
 
     function openEditModal(room) {
@@ -48,42 +56,40 @@ export default function RoomManager() {
         setShowModal(true);
     }
 
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
         if (!formData.roomNumber.trim()) {
             setError('กรุณากรอกเลขห้อง');
             return;
         }
 
-        let result;
-        if (editingRoom) {
-            result = updateRoom(editingRoom, formData);
-        } else {
-            result = addRoom(formData);
-        }
+        try {
+            if (editingRoom) {
+                await roomAPI.update(editingRoom, formData);
+            } else {
+                await roomAPI.create(formData);
+            }
 
-        if (result.success) {
             setShowModal(false);
             loadData();
             if (!editingRoom) {
-                // Return to first page to see the newly unshifted room
                 setCurrentPage(1);
-                setSearchTerm(''); // Clear search to ensure new room is visible
+                setSearchTerm('');
             }
             showToast(editingRoom ? 'อัปเดตข้อมูลห้องสำเร็จ' : 'เพิ่มห้องใหม่สำเร็จ', 'success');
-        } else {
-            setError(result.error);
+        } catch (err) {
+            setError(err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
         }
     }
 
     function handleDelete(roomNumber) {
-        showConfirm(`ยืนยันลบห้อง ${roomNumber}?`, () => {
-            const result = deleteRoom(roomNumber);
-            if (result.success) {
+        showConfirm(`ยืนยันลบห้อง ${roomNumber}?`, async () => {
+            try {
+                await roomAPI.delete(roomNumber);
                 loadData();
                 showToast(`ลบห้อง ${roomNumber} สำเร็จ`, 'success');
-            } else {
-                showToast(result.error || 'เกิดข้อผิดพลาดในการลบห้อง', 'error');
+            } catch (err) {
+                showToast(err.message || 'เกิดข้อผิดพลาดในการลบห้อง', 'error');
             }
         });
     }
