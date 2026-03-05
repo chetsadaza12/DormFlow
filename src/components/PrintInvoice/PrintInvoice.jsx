@@ -21,43 +21,16 @@ export default function PrintInvoice({ billingResult, onClose }) {
         loadSettings();
     }, []);
 
-    // Dynamically scale the invoice paper to fit the viewport on mobile
-    useEffect(() => {
-        function updateScale() {
-            if (paperRef.current) {
-                const viewportWidth = window.innerWidth;
-                const padding = 32; // 16px each side
-
-                // Reset to measure true dimensions
-                paperRef.current.style.transform = 'none';
-                paperRef.current.style.marginBottom = '0px';
-
-                const paperWidth = paperRef.current.offsetWidth || 700;
-                const originalHeight = paperRef.current.offsetHeight;
-
-                if (viewportWidth < paperWidth + padding) {
-                    const scale = (viewportWidth - padding) / paperWidth;
-                    paperRef.current.style.transform = `scale(${scale})`;
-                    // Remove negative space caused by scaling
-                    paperRef.current.style.marginBottom = `${(originalHeight * scale) - originalHeight}px`;
-                    paperRef.current.parentElement.style.minHeight = 'auto'; // Reset parent minHeight
-                } else {
-                    paperRef.current.parentElement.style.minHeight = 'auto';
-                }
-            }
-        }
-
-        updateScale();
-        // Give it a small delay for content layout to finish before scaling
-        setTimeout(updateScale, 150);
-        window.addEventListener('resize', updateScale);
-        return () => window.removeEventListener('resize', updateScale);
-    }, [billingResult]);
+    // Use CSS for responsiveness instead of buggy JS transforms
 
     if (!billingResult || !settings) return null;
 
     function handlePrint() {
-        window.print();
+        try {
+            window.print();
+        } catch (error) {
+            alert('เบราว์เซอร์หรือแอปพลิเคชันที่คุณใช้งานอยู่ไม่รองรับคำสั่งพิมพ์โดยตรง กรุณาเปิดผ่าน Chrome หรือ Safari');
+        }
     }
 
     const handleSaveImage = async () => {
@@ -70,11 +43,13 @@ export default function PrintInvoice({ billingResult, onClose }) {
             // Clone the element to avoid any viewport/scroll limitations on mobile
             const clone = element.cloneNode(true);
 
-            // Apply strict off-screen styles to the clone
+            // Apply off-screen styles to the clone but keep it fully opaque
+            // We use zIndex: -1 so it stays behind the dark overlay
             Object.assign(clone.style, {
-                position: 'absolute',
-                top: '-9999px',
-                left: '-9999px',
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                zIndex: '-1',
                 width: 'max-content',
                 minWidth: '700px',
                 transform: 'none',
@@ -103,15 +78,38 @@ export default function PrintInvoice({ billingResult, onClose }) {
             // Clean up the clone
             document.body.removeChild(clone);
 
-            // Convert to image and download
+            const thaiYear = new Date(billingResult.billingDate).getFullYear() + 543;
+            const month = new Date(billingResult.billingDate).getMonth() + 1;
+            const fileName = `บิลค่าเช่า_ห้อง${billingResult.roomNumber}_${month}_${thaiYear}.jpg`;
+
             const image = canvas.toDataURL('image/jpeg', 0.95);
+
+            // Try standard download first
             const link = document.createElement('a');
             link.href = image;
-            link.download = `บิลค่าเช่า_ห้อง${billingResult.roomNumber}_${billingDate.getMonth() + 1}_${thaiYear}.jpg`;
+            link.download = fileName;
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
+
+            // Fallback for strict mobile browsers (iOS Safari sometimes ignores .click() download)
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                setTimeout(() => {
+                    const newTab = window.open();
+                    if (newTab) {
+                        newTab.document.body.innerHTML = `
+                       <div style="text-align:center; padding: 20px; font-family: sans-serif; background: #fff;">
+                          <h3 style="color: #059669;">✅ ค้างไว้ที่รูปภาพเพื่อเลือก 'บันทึกรูปภาพ'</h3>
+                          <img src="${image}" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" />
+                       </div>`;
+                    }
+                }, 500);
+            }
+
         } catch (error) {
             console.error('Error saving image:', error);
-            alert('เกิดข้อผิดพลาดในการบันทึกรูปภาพ');
+            alert('เกิดข้อผิดพลาดในการบันทึกรูปภาพ: ' + error.message);
         } finally {
             setIsSaving(false);
         }

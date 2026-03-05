@@ -21,6 +21,9 @@
     max-width: 800px;
     animation: fadeInUp 0.4s ease;
     margin: auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
 }
 
 .close-btn {
@@ -64,7 +67,7 @@
     min-width: 700px;
     max-width: none;
     margin: 0 auto;
-    transform-origin: top left;
+    transform-origin: top center;
 }
 
 /* Document Structure (Matching Screenshot) */
@@ -202,6 +205,7 @@
     display: flex;
     gap: var(--space-md);
     margin-top: var(--space-lg);
+    width: 100%;
 }
 
 .print-action-btn {
@@ -295,7 +299,7 @@
 }
 
 /* ============ MOBILE RESPONSIVE ============ */
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
     .print-overlay {
         padding: 16px 8px;
     }
@@ -318,6 +322,40 @@
 
     .print-actions {
         flex-wrap: wrap;
+    }
+
+    .invoice-paper {
+        min-width: 100%;
+        max-width: 100%;
+        padding: 24px 12px;
+        border-radius: 8px;
+    }
+
+    .invoice-title {
+        font-size: 20px;
+    }
+
+    .invoice-room h2 {
+        font-size: 16px;
+    }
+
+    .invoice-date p {
+        font-size: 14px;
+    }
+
+    .invoice-table-v2 th,
+    .invoice-table-v2 td {
+        padding: 6px 4px;
+        font-size: 12px;
+    }
+
+    .invoice-footer-amount h3 {
+        font-size: 16px;
+    }
+
+    .invoice-footer-note p,
+    .invoice-footer-contact p {
+        font-size: 11px;
     }
 
     .print-action-btn,
@@ -372,13 +410,16 @@
         margin: 0;
     }
 
-    /* เอาแสงเงาออกตอนพิมพ์ */
+    /* เอาแสงเงาและความกว้างบังคับออกตอนพิมพ์ */
     .invoice-paper {
-        box-shadow: none;
-        padding: 0;
-        border-radius: 0;
-        width: 100%;
-        transform: none;
+        box-shadow: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        transform: none !important;
+        margin: 0 !important;
     }
 
     /* ซ่อนปุ่มต่างๆ โดยเฉพาะ */
