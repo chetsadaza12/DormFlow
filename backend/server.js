@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import connectDB from './config/db.js';
 
 // Routes
 import roomRoutes from './routes/roomRoutes.js';
@@ -8,6 +9,9 @@ import billRoutes from './routes/billRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 
 dotenv.config();
+
+// Connect to Database
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

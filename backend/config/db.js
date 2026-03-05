@@ -27,19 +27,16 @@
 // export default sequelize;
 
 // ============ ตัวอย่าง MongoDB (Mongoose) ============
-// import mongoose from 'mongoose';
-//
-// const connectDB = async () => {
-//     try {
-//         await mongoose.connect(process.env.MONGO_URI);
-//         console.log('✅ MongoDB connected');
-//     } catch (error) {
-//         console.error('❌ MongoDB connection error:', error.message);
-//         process.exit(1);
-//     }
-// };
-//
-// export default connectDB;
+import mongoose from 'mongoose';
 
-console.log('⚠️  Database config not set up yet. Choose your database in config/db.js');
-export default null;
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI);
+        console.log('✅ MongoDB connected successfully!');
+    } catch (error) {
+        console.error('❌ MongoDB connection error:', error.message);
+        process.exit(1);
+    }
+};
+
+export default connectDB;
