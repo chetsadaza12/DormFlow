@@ -11,10 +11,11 @@ export default function Header() {
             <div className="header-inner">
                 <div className="header-brand">
                     <div className="header-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                            <polyline points="9 22 9 12 15 12 15 22" />
-                        </svg>
+                        <img
+                            src="/assets/images/output-onlinegiftools.gif"
+                            alt="Logo"
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
                     </div>
                     <div className="header-text">
                         <h1 className="header-title">ระบบคิดบิลค่าน้ำค่าไฟ</h1>
