@@ -27,7 +27,11 @@ export default function RoomManager() {
     async function loadData() {
         try {
             const data = await roomAPI.getAll();
-            setRooms(data);
+            // Sort naturally (A1, A2... A10) instead of alphabetically
+            const sortedData = [...data].sort((a, b) =>
+                a.roomNumber.localeCompare(b.roomNumber, undefined, { numeric: true, sensitivity: 'base' })
+            );
+            setRooms(sortedData);
         } catch (err) {
             showToast(err.message || 'ไม่สามารถโหลดข้อมูลห้องได้', 'error');
         }

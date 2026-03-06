@@ -21,7 +21,10 @@ async function request(url, options = {}) {
 // ========== ROOM API ==========
 
 export const roomAPI = {
-    getAll: () => request('/rooms'),
+    getAll: async () => {
+        const data = await request('/rooms');
+        return data.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber, undefined, { numeric: true, sensitivity: 'base' }));
+    },
 
     getByNumber: (roomNumber) => request(`/rooms/${roomNumber}`),
 
