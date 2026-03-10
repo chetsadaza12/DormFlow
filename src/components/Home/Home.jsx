@@ -3,7 +3,7 @@ import { roomAPI, settingsAPI } from '../../services/api';
 import './Home.css';
 
 const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
-    const [availableRooms, setAvailableRooms] = useState([]);
+    const [allRooms, setAllRooms] = useState([]);
     const [businessName, setBusinessName] = useState('หอพักนรสิงห์');
     const [homeHeroSubtitle, setHomeHeroSubtitle] = useState('ที่พักคุณภาพ สะอาด ปลอดภัย เดินทางสะดวกสบาย');
     const [homeContactPhone, setHomeContactPhone] = useState('092-5152-870 โก้ / 082-508-8909 พอล');
@@ -28,7 +28,15 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                     if (settingsObj.homeContactLineId) setHomeContactLineId(settingsObj.homeContactLineId);
                 }
                 
-                setAvailableRooms(rooms.filter(r => r.isOccupied === false || r.isOccupied === undefined));
+                
+                // Sort rooms by roomNumber to ensure they display in order
+                const sortedRooms = rooms.sort((a, b) => {
+                    const numA = a.roomNumber.toString().padStart(5, '0');
+                    const numB = b.roomNumber.toString().padStart(5, '0');
+                    return numA.localeCompare(numB);
+                });
+                
+                setAllRooms(sortedRooms);
             } catch (err) {
                 setError('ไม่สามารถโหลดข้อมูลหน้าหลักได้');
                 console.error(err);
@@ -81,43 +89,77 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                 </div>
             </section>
 
-            {/* Available Rooms Section */}
-            <section id="available-rooms" className="available-rooms-section">
-                <h2>ห้องว่างพร้อมเข้าอยู่</h2>
+            {/* Room Status Section */}
+            <section id="available-rooms" className="room-status-section">
+                <h2>สถานะห้องพัก</h2>
                 
                 {isLoading ? (
                     <div className="loading-spinner">กำลังโหลดข้อมูล...</div>
                 ) : error ? (
                     <div className="error-message">{error}</div>
-                ) : availableRooms.length === 0 ? (
-                    <div className="no-rooms-message">
-                        <h3>😔 ขณะนี้ห้องพักเต็มทุกห้อง</h3>
-                        <p>กรุณาติดตามหรือติดต่อสอบถามล่วงหน้า</p>
-                    </div>
                 ) : (
-                    <div className="rooms-grid">
-                        {availableRooms.map(room => (
-                            <div key={room._id || room.roomNumber} className="room-card">
-                                <div className="room-image-placeholder">
-                                    <span>ห้อง {room.roomNumber}</span>
-                                </div>
-                                <div className="room-details">
-                                    <div className="room-header">
-                                        <h3>ห้อง {room.roomNumber}</h3>
-                                        <span className="status-badge available">ว่าง</span>
-                                    </div>
-                                    <p className="room-price">
-                                        เริ่มต้น <span className="price">{room.roomRent.toLocaleString()}</span> บาท/เดือน
-                                    </p>
-                                    <div className="room-features">
-                                        <span>❄️ แอร์</span>
-                                        <span>🛏️ เตียง</span>
-                                        <span>🚿 น้ำอุ่น</span>
-                                    </div>
-                                    <a href="#contact" className="contact-btn">สนใจติดต่อเช่า</a>
-                                </div>
+                    <div className="room-dashboard">
+                        {/* Summary Bar */}
+                        <div className="room-summary-bar">
+                            <div className="summary-stat total">
+                                <span className="stat-label">ห้องทั้งหมด</span>
+                                <span className="stat-value">{allRooms.length}</span>
                             </div>
-                        ))}
+                            <div className="summary-stat available">
+                                <span className="stat-label">ห้องว่าง</span>
+                                <span className="stat-value">{allRooms.filter(r => r.isOccupied === false || r.isOccupied === undefined).length}</span>
+                            </div>
+                            <div className="summary-stat occupied">
+                                <span className="stat-label">มีผู้เช่าแล้ว</span>
+                                <span className="stat-value">{allRooms.filter(r => r.isOccupied === true).length}</span>
+                            </div>
+                        </div>
+
+                        {/* Rooms Grid */}
+                        <div className="rooms-grid">
+                            {allRooms.map(room => {
+                                const isAvailable = room.isOccupied === false || room.isOccupied === undefined;
+                                
+                                return (
+                                    <div key={room._id || room.roomNumber} className={`room-card modern ${isAvailable ? 'available' : 'occupied'}`}>
+                                        <div className="room-card-inner">
+                                            <div className="room-header-modern">
+                                                <div className="room-number-badge">
+                                                    ห้อง {room.roomNumber}
+                                                </div>
+                                                <div className={`status-badge modern ${isAvailable ? 'available' : 'occupied'}`}>
+                                                    {isAvailable ? 'ว่าง' : 'ไม่ว่าง'}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="room-details-modern">
+                                                {isAvailable ? (
+                                                    <>
+                                                        <div className="price-tag">
+                                                            <span className="currency">฿</span>
+                                                            <span className="amount">{room.roomRent.toLocaleString()}</span>
+                                                            <span className="period">/ เดือน</span>
+                                                        </div>
+                                                        <div className="amenities-list">
+                                                            <span className="amenity" title="เครื่องปรับอากาศ"><i className="icon-ac">❄️</i> แอร์</span>
+                                                            <span className="amenity" title="เตียงนอน"><i className="icon-bed">🛏️</i> เตียง</span>
+                                                            <span className="amenity" title="เครื่องทำน้ำอุ่น"><i className="icon-heater">🚿</i> น้ำอุ่น</span>
+                                                            <span className="amenity" title="ฟรี WiFi"><i className="icon-wifi">📶</i> WiFi</span>
+                                                        </div>
+                                                        <a href="#contact" className="action-btn modern-btn">สนใจจองห้องนี้</a>
+                                                    </>
+                                                ) : (
+                                                    <div className="occupied-state">
+                                                        <div className="occupied-icon">🔒</div>
+                                                        <p>ห้องนี้มีผู้เช่าแล้ว</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 )}
             </section>
@@ -126,19 +168,22 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
             <section id="contact" className="contact-section">
                 <h2>ติดต่อสอบถาม / จองห้องพัก</h2>
                 <div className="contact-info">
-                    <div className="contact-card">
-                        <h3>📞 โทรศัพท์</h3>
+                    <div className="contact-card modern">
+                        <div className="contact-icon">📞</div>
+                        <h3>โทรศัพท์</h3>
                         <p>{homeContactPhone}</p>
                     </div>
-                    <div className="contact-card">
-                        <h3>💬 LINE ID</h3>
-                        <p>{homeContactLineId}</p>
-                        <p className="hint">(แอดไลน์เพื่อสอบถามรายละเอียดเพิ่มเติม)</p>
+                    <div className="contact-card modern">
+                        <div className="contact-icon">💬</div>
+                        <h3>LINE ID</h3>
+                        <p className="highlight-text">{homeContactLineId}</p>
+                        <p className="hint">แอดไลน์เพื่อสอบถามรายละเอียด</p>
                     </div>
-                    <div className="contact-card">
-                        <h3>📍 ที่ตั้ง</h3>
+                    <div className="contact-card modern">
+                        <div className="contact-icon">📍</div>
+                        <h3>ที่ตั้ง</h3>
                         <p>{businessName}</p>
-                        <p className="hint">(แผนที่ Google Maps)</p>
+                        <p className="hint">แผนที่ Google Maps</p>
                     </div>
                 </div>
             </section>
