@@ -11,6 +11,18 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedFilter, setSelectedFilter] = useState(null); // null | 'all' | 'available' | 'occupied'
+
+    const handleFilterClick = (filterType) => {
+        setSelectedFilter(prev => prev === filterType ? null : filterType);
+    };
+
+    const getFilteredRooms = () => {
+        if (!selectedFilter || selectedFilter === 'all') return allRooms;
+        if (selectedFilter === 'available') return allRooms.filter(r => r.isOccupied === false || r.isOccupied === undefined);
+        if (selectedFilter === 'occupied') return allRooms.filter(r => r.isOccupied === true);
+        return allRooms;
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -99,67 +111,86 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                     <div className="error-message">{error}</div>
                 ) : (
                     <div className="room-dashboard">
-                        {/* Summary Bar */}
+                        {/* Summary Bar - Clickable Filter Tabs */}
                         <div className="room-summary-bar">
-                            <div className="summary-stat total">
+                            <div 
+                                className={`summary-stat total ${selectedFilter === 'all' ? 'active' : ''}`}
+                                onClick={() => handleFilterClick('all')}
+                            >
                                 <span className="stat-label">ห้องทั้งหมด</span>
                                 <span className="stat-value">{allRooms.length}</span>
+                                <span className="stat-hint">คลิกเพื่อดู</span>
                             </div>
-                            <div className="summary-stat available">
+                            <div 
+                                className={`summary-stat available ${selectedFilter === 'available' ? 'active' : ''}`}
+                                onClick={() => handleFilterClick('available')}
+                            >
                                 <span className="stat-label">ห้องว่าง</span>
                                 <span className="stat-value">{allRooms.filter(r => r.isOccupied === false || r.isOccupied === undefined).length}</span>
+                                <span className="stat-hint">คลิกเพื่อดู</span>
                             </div>
-                            <div className="summary-stat occupied">
+                            <div 
+                                className={`summary-stat occupied ${selectedFilter === 'occupied' ? 'active' : ''}`}
+                                onClick={() => handleFilterClick('occupied')}
+                            >
                                 <span className="stat-label">มีผู้เช่าแล้ว</span>
                                 <span className="stat-value">{allRooms.filter(r => r.isOccupied === true).length}</span>
+                                <span className="stat-hint">คลิกเพื่อดู</span>
                             </div>
                         </div>
 
-                        {/* Rooms Grid */}
-                        <div className="rooms-grid">
-                            {allRooms.map(room => {
-                                const isAvailable = room.isOccupied === false || room.isOccupied === undefined;
-                                
-                                return (
-                                    <div key={room._id || room.roomNumber} className={`room-card modern ${isAvailable ? 'available' : 'occupied'}`}>
-                                        <div className="room-card-inner">
-                                            <div className="room-header-modern">
-                                                <div className="room-number-badge">
-                                                    ห้อง {room.roomNumber}
-                                                </div>
-                                                <div className={`status-badge modern ${isAvailable ? 'available' : 'occupied'}`}>
-                                                    {isAvailable ? 'ว่าง' : 'ไม่ว่าง'}
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="room-details-modern">
-                                                {isAvailable ? (
-                                                    <>
-                                                        <div className="price-tag">
-                                                            <span className="currency">฿</span>
-                                                            <span className="amount">{room.roomRent.toLocaleString()}</span>
-                                                            <span className="period">/ เดือน</span>
-                                                        </div>
-                                                        <div className="amenities-list">
-                                                            <span className="amenity" title="เครื่องปรับอากาศ"><i className="icon-ac">❄️</i> แอร์</span>
-                                                            <span className="amenity" title="เตียงนอน"><i className="icon-bed">🛏️</i> เตียง</span>
-                                                            <span className="amenity" title="เครื่องทำน้ำอุ่น"><i className="icon-heater">🚿</i> น้ำอุ่น</span>
-                                                            <span className="amenity" title="ฟรี WiFi"><i className="icon-wifi">📶</i> WiFi</span>
-                                                        </div>
-                                                        <a href="#contact" className="action-btn modern-btn">สนใจจองห้องนี้</a>
-                                                    </>
-                                                ) : (
-                                                    <div className="occupied-state">
-                                                        <div className="occupied-icon">🔒</div>
-                                                        <p>ห้องนี้มีผู้เช่าแล้ว</p>
+                        {/* Rooms Grid - Hidden by default, shown when filter is selected */}
+                        {selectedFilter === null ? (
+                            <div className="room-grid-placeholder">
+                                <div className="placeholder-icon">👆</div>
+                                <p>คลิกเลือกประเภทห้องด้านบนเพื่อดูรายละเอียด</p>
+                            </div>
+                        ) : (
+                            <div className="rooms-grid">
+                                {getFilteredRooms().map(room => {
+                                    const isAvailable = room.isOccupied === false || room.isOccupied === undefined;
+                                    
+                                    return (
+                                        <div key={room._id || room.roomNumber} className={`room-card modern ${isAvailable ? 'available' : 'occupied'}`}>
+                                            <div className="room-card-inner">
+                                                <div className="room-header-modern">
+                                                    <div className="room-number-badge">
+                                                        ห้อง {room.roomNumber}
                                                     </div>
-                                                )}
+                                                    <div className={`status-badge modern ${isAvailable ? 'available' : 'occupied'}`}>
+                                                        {isAvailable ? 'ว่าง' : 'ไม่ว่าง'}
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="room-details-modern">
+                                                    {isAvailable ? (
+                                                        <>
+                                                            <div className="price-tag">
+                                                                <span className="currency">฿</span>
+                                                                <span className="amount">{room.roomRent.toLocaleString()}</span>
+                                                                <span className="period">/ เดือน</span>
+                                                            </div>
+                                                            <div className="amenities-list">
+                                                                <span className="amenity" title="เครื่องปรับอากาศ"><i className="icon-ac">❄️</i> แอร์</span>
+                                                                <span className="amenity" title="เตียงนอน"><i className="icon-bed">🛏️</i> เตียง</span>
+                                                                <span className="amenity" title="เครื่องทำน้ำอุ่น"><i className="icon-heater">🚿</i> น้ำอุ่น</span>
+                                                                <span className="amenity" title="ฟรี WiFi"><i className="icon-wifi">📶</i> WiFi</span>
+                                                            </div>
+                                                            <a href="#contact" className="action-btn modern-btn">สนใจจองห้องนี้</a>
+                                                        </>
+                                                    ) : (
+                                                        <div className="occupied-state">
+                                                            <div className="occupied-icon">🔒</div>
+                                                            <p>ห้องนี้มีผู้เช่าแล้ว</p>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 )}
             </section>
