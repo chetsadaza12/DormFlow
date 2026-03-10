@@ -6,6 +6,9 @@ const router = express.Router();
 // GET /api/rooms - ดึงห้องทั้งหมด
 router.get('/', roomController.getAllRooms);
 
+// GET /api/rooms/available - ดึงห้องที่ว่าง
+router.get('/available', roomController.getAvailableRooms);
+
 // GET /api/rooms/:roomNumber - ดึงข้อมูลห้องตามเลขห้อง
 router.get('/:roomNumber', roomController.getRoomByNumber);
 

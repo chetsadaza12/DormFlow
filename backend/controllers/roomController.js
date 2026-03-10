@@ -10,6 +10,21 @@ export const getAllRooms = async (req, res) => {
     }
 };
 
+// GET /api/rooms/available
+export const getAvailableRooms = async (req, res) => {
+    try {
+        const rooms = await Room.find({ 
+            $or: [
+                { isOccupied: false },
+                { isOccupied: { $exists: false } }
+            ]
+        }).sort({ roomNumber: 1 });
+        res.json(rooms);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // GET /api/rooms/:roomNumber
 export const getRoomByNumber = async (req, res) => {
     try {

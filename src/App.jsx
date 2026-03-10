@@ -6,6 +6,7 @@ import BillingForm from './components/BillingForm/BillingForm';
 import InvoiceSummary from './components/InvoiceSummary/InvoiceSummary';
 import PrintInvoice from './components/PrintInvoice/PrintInvoice';
 import AdminPanel from './components/Admin/AdminPanel';
+import Home from './components/Home/Home';
 import './App.css';
 
 function App() {
@@ -32,7 +33,7 @@ function App() {
     } = useBilling();
 
     const [showPrint, setShowPrint] = useState(false);
-    const [currentPage, setCurrentPage] = useState('billing'); // 'billing' | 'admin'
+    const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'billing' | 'admin'
 
     function handlePrint() {
         if (!isBillSaved) {
@@ -51,13 +52,21 @@ function App() {
         return <AdminPanel onBackToBilling={() => setCurrentPage('billing')} />;
     }
 
+    // ===== Home Page =====
+    if (currentPage === 'home') {
+        return <Home onNavigateToBilling={() => setCurrentPage('billing')} onNavigateToAdmin={() => setCurrentPage('admin')} />;
+    }
+
     // ===== Billing Page (เดิม) =====
     return (
         <div className="app" id="billingApp">
             <Header />
 
-            {/* Admin Button */}
-            <div className="admin-toggle-bar no-print">
+            {/* Admin/Home Navigation */}
+            <div className="admin-toggle-bar no-print" style={{ display: 'flex', gap: '10px' }}>
+                <button className="admin-toggle-btn" onClick={() => setCurrentPage('home')} style={{ background: '#4CAF50' }}>
+                    หน้าหลัก
+                </button>
                 <button className="admin-toggle-btn" onClick={() => setCurrentPage('admin')}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="12" cy="12" r="3" />
