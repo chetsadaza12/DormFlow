@@ -109,9 +109,51 @@
     }
 }
 
+/* Header Nav Buttons */
+.header-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: var(--font-thai);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.header-nav-btn:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary-light);
+    transform: translateY(-1px);
+}
+
+.header-nav-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
 /* ============ LIGHT THEME OVERRIDES ============ */
 :root.light-theme .header-date {
     background: var(--bg-card);
     border-color: var(--border-color);
     color: var(--text-primary);
+}
+
+:root.light-theme .header-nav-btn {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+:root.light-theme .header-nav-btn:hover {
+    background: var(--bg-input-focus);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
 }
