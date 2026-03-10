@@ -17,11 +17,19 @@ const settingsSchema = new mongoose.Schema({
 
 // Default settings values
 settingsSchema.statics.defaults = {
+    // Website Settings
     businessName: 'นรสิงห์',
+    homeHeroSubtitle: 'ที่พักคุณภาพ สะอาด ปลอดภัย เดินทางสะดวกสบาย',
+    homeContactPhone: '092-5152-870 โก้ / 082-508-8909 พอล',
+    homeContactLineId: 'narasing.dorm',
+    
+    // Billing Settings
     invoiceTitle: 'บิลค่าเช่าห้องแถว นรสิงห์',
     headerSubtitle: 'Narasing Billing System',
     paymentNote: 'ชำระเงินทุกวันที่ 5 ของทุกเดือนหรือเกินกำหนดวันชำระนั้นๆ ปรับเพิ่มวันละ 100 บาท',
     contactInfo: 'ช่องทางการติดต่อ สอบถาม 092-5152-870 โก้ / 082-508-8909 พอล',
+    
+    // Pricing
     waterRate: 18,
     electricRate: 8,
     roomRent: 0
@@ -42,7 +50,7 @@ settingsSchema.statics.setMultiple = async function (settings) {
     const ops = Object.entries(settings).map(([key, value]) => ({
         updateOne: {
             filter: { key },
-            update: { key, value },
+            update: { $set: { key, value } },
             upsert: true
         }
     }));

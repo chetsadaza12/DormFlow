@@ -146,3 +146,55 @@ textarea.setting-input {
         padding: var(--space-lg);
     }
 }
+
+/* Settings Groups (Accordion) */
+.settings-group {
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card); /* Using card background or slightly dark */
+    overflow: hidden;
+}
+
+.settings-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-lg) var(--space-xl);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.02);
+    transition: background 0.2s ease;
+}
+
+.settings-group-header:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.settings-group-header.expanded {
+    background: rgba(99, 102, 241, 0.05);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settings-group-title {
+    font-size: 1.15rem;
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.chevron-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+}
+
+.chevron-icon.expanded {
+    transform: rotate(180deg);
+}
+
+.settings-group .settings-cards {
+    margin-top: 0;
+    padding: var(--space-xl);
+    background: transparent;
+}

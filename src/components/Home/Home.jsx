@@ -1,29 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { roomAPI } from '../../services/api';
+import { roomAPI, settingsAPI } from '../../services/api';
 import './Home.css';
 
 const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
     const [availableRooms, setAvailableRooms] = useState([]);
+    const [businessName, setBusinessName] = useState('หอพักนรสิงห์');
+    const [homeHeroSubtitle, setHomeHeroSubtitle] = useState('ที่พักคุณภาพ สะอาด ปลอดภัย เดินทางสะดวกสบาย');
+    const [homeContactPhone, setHomeContactPhone] = useState('092-5152-870 โก้ / 082-508-8909 พอล');
+    const [homeContactLineId, setHomeContactLineId] = useState('narasing.dorm');
+
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchAvailableRooms = async () => {
+        const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const rooms = await roomAPI.getAll(); // Temporarily using getAll and filtering client side if the new endpoint isn't fully ready, or we can use a new method if we add it to api.js. Let's add it to api.js next.
-                // Assuming we update api.js to have getAvailable()
-                // const rooms = await roomAPI.getAvailable();
+                const [rooms, settingsObj] = await Promise.all([
+                    roomAPI.getAll(),
+                    settingsAPI.get()
+                ]);
+                
+                if (settingsObj) {
+                    if (settingsObj.businessName) setBusinessName(settingsObj.businessName);
+                    if (settingsObj.homeHeroSubtitle) setHomeHeroSubtitle(settingsObj.homeHeroSubtitle);
+                    if (settingsObj.homeContactPhone) setHomeContactPhone(settingsObj.homeContactPhone);
+                    if (settingsObj.homeContactLineId) setHomeContactLineId(settingsObj.homeContactLineId);
+                }
+                
                 setAvailableRooms(rooms.filter(r => r.isOccupied === false || r.isOccupied === undefined));
             } catch (err) {
-                setError('ไม่สามารถโหลดข้อมูลห้องว่างได้');
+                setError('ไม่สามารถโหลดข้อมูลหน้าหลักได้');
                 console.error(err);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchAvailableRooms();
+        fetchData();
     }, []);
 
     return (
@@ -32,8 +46,8 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
             <header className="hero-section">
                 <div className="hero-overlay"></div>
                 <div className="hero-content">
-                    <h1>หอพักนรสิงห์</h1>
-                    <p>ที่พักคุณภาพ สะอาด ปลอดภัย เดินทางสะดวกสบาย</p>
+                    <h1>{businessName}</h1>
+                    <p>{homeHeroSubtitle}</p>
                     <button className="cta-button" onClick={() => document.getElementById('available-rooms').scrollIntoView({ behavior: 'smooth' })}>
                         ดูห้องว่างวันนี้
                     </button>
@@ -114,17 +128,16 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                 <div className="contact-info">
                     <div className="contact-card">
                         <h3>📞 โทรศัพท์</h3>
-                        <p>092-5152-870 (โก้)</p>
-                        <p>082-508-8909 (พอล)</p>
+                        <p>{homeContactPhone}</p>
                     </div>
                     <div className="contact-card">
                         <h3>💬 LINE ID</h3>
-                        <p>narasing.dorm</p>
+                        <p>{homeContactLineId}</p>
                         <p className="hint">(แอดไลน์เพื่อสอบถามรายละเอียดเพิ่มเติม)</p>
                     </div>
                     <div className="contact-card">
                         <h3>📍 ที่ตั้ง</h3>
-                        <p>หอพักนรสิงห์</p>
+                        <p>{businessName}</p>
                         <p className="hint">(แผนที่ Google Maps)</p>
                     </div>
                 </div>
@@ -132,7 +145,7 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
 
             {/* Footer with Admin Access */}
             <footer className="home-footer">
-                <p>© 2026 Narasing Apartment. All rights reserved.</p>
+                <p>© 2026 {businessName}. All rights reserved.</p>
                 <div className="hidden-admin-links">
                     <button onClick={onNavigateToBilling} className="text-btn">ระบบคิดบิล</button>
                     <span>|</span>
