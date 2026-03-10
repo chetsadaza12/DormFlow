@@ -31,7 +31,7 @@ export default function Header({ onNavigateHome, onNavigateAdmin }) {
                         <p className="header-subtitle">{settings.headerSubtitle}</p>
                     </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                <div className="header-actions">
                     {onNavigateHome && (
                         <button className="header-nav-btn no-print" onClick={onNavigateHome}>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
