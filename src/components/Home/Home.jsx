@@ -79,22 +79,22 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                 <h2>สิ่งอำนวยความสะดวกของเรา</h2>
                 <div className="facilities-grid">
                     <div className="facility-item">
-                        <span className="facility-icon">🛡️</span>
+                        <img className="facility-icon-gif" src="/assets/images/ปลอดภัย 24 ชม..gif" alt="ปลอดภัย 24 ชม." />
                         <h3>ปลอดภัย 24 ชม.</h3>
                         <p>รปภ. และกล้องวงจรปิด ทุกชั้น</p>
                     </div>
                     <div className="facility-item">
-                        <span className="facility-icon">🚗</span>
+                        <img className="facility-icon-gif" src="/assets/images/ที่จอดรถ.gif" alt="ที่จอดรถ" />
                         <h3>ที่จอดรถ</h3>
                         <p>กว้างขวาง ร่มรื่น เพียงพอต่อผู้เช่า</p>
                     </div>
                     <div className="facility-item">
-                        <span className="facility-icon">📶</span>
+                        <img className="facility-icon-gif" src="/assets/images/Wi-Fi.gif" alt="Wi-Fi" />
                         <h3>ฟรี Wi-Fi</h3>
                         <p>อินเทอร์เน็ตความเร็วสูง ครอบคลุมทุกพื้นที่</p>
                     </div>
                     <div className="facility-item">
-                        <span className="facility-icon">🛏️</span>
+                        <img className="facility-icon-gif" src="/assets/images/เฟอร์นิเจอร์ครบ.gif" alt="เฟอร์นิเจอร์ครบ" />
                         <h3>เฟอร์นิเจอร์ครบ</h3>
                         <p>พร้อมเข้าอยู่ได้ทันที ไม่ต้องซื้อเพิ่ม</p>
                     </div>
