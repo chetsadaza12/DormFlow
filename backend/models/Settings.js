@@ -22,6 +22,12 @@ settingsSchema.statics.defaults = {
     homeHeroSubtitle: 'ที่พักคุณภาพ สะอาด ปลอดภัย เดินทางสะดวกสบาย',
     homeContactPhone: '092-5152-870 โก้ / 082-508-8909 พอล',
     homeContactLineId: 'narasing.dorm',
+    homeFacilities: [
+        { title: 'ปลอดภัย 24 ชม.', description: 'รปภ. และกล้องวงจรปิด ทุกชั้น', icon: '/assets/images/ปลอดภัย 24 ชม..gif' },
+        { title: 'ที่จอดรถ', description: 'กว้างขวาง ร่มรื่น เพียงพอต่อผู้เช่า', icon: '/assets/images/ที่จอดรถ.gif' },
+        { title: 'ฟรี Wi-Fi', description: 'อินเทอร์เน็ตความเร็วสูง ครอบคลุมทุกพื้นที่', icon: '/assets/images/Wi-Fi.gif' },
+        { title: 'เฟอร์นิเจอร์ครบ', description: 'พร้อมเข้าอยู่ได้ทันที ไม่ต้องซื้อเพิ่ม', icon: '/assets/images/เฟอร์นิเจอร์ครบ.gif' }
+    ],
     
     // Billing Settings
     invoiceTitle: 'บิลค่าเช่าห้องแถว นรสิงห์',

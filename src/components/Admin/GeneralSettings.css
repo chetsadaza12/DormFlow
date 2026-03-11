@@ -198,3 +198,293 @@ textarea.setting-input {
     padding: var(--space-xl);
     background: transparent;
 }
+
+/* Facilities Editor */
+.facilities-editor-card {
+    border: 2px dashed var(--border-color);
+}
+
+.facilities-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.facility-edit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--bg-glass);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: border-color 0.2s;
+}
+
+.facility-edit-item:hover {
+    border-color: var(--accent);
+}
+
+.facility-edit-preview {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: var(--radius-md);
+    background: var(--bg-glass);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.facility-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.facility-preview-emoji {
+    font-size: 1.8rem;
+}
+
+.facility-edit-fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.facility-edit-fields .setting-input {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.9rem;
+}
+
+.facility-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-sm);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    align-self: center;
+}
+
+.facility-delete-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.facility-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.facility-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-md);
+    margin-top: var(--space-md);
+    background: var(--bg-glass);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.facility-add-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.facility-add-btn:hover {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: var(--accent);
+}
+
+/* Icon Picker Additions */
+.facility-edit-preview.clickable {
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.facility-edit-preview.clickable:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.icon-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.icon-path-input {
+    flex: 1;
+    padding-right: 40px !important;
+    cursor: pointer;
+    background-color: var(--bg-input) !important;
+}
+
+.icon-picker-trigger {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.icon-picker-trigger:hover {
+    color: var(--accent);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.icon-picker-trigger svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Icon Picker Modal */
+.icon-picker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.icon-picker-modal {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.icon-picker-header {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.icon-picker-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.icon-picker-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.icon-picker-close:hover {
+    background: var(--bg-input);
+    color: var(--text-primary);
+}
+
+.icon-picker-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+.icon-picker-grid {
+    padding: var(--space-lg);
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-md);
+}
+
+.icon-picker-item {
+    background: var(--bg-input);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.icon-picker-item:hover {
+    background: var(--bg-input-focus);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.icon-picker-item.selected {
+    border-color: var(--accent);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.icon-picker-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.icon-picker-item .icon-name {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}

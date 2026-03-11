@@ -2,7 +2,8 @@
 
 .home-page {
     font-family: 'Prompt', 'Kanit', sans-serif;
-    color: #333;
+    color: #0f172a; /* Light theme primary text */
+    background-color: #f8fafc; /* Light theme primary background */
     line-height: 1.6;
 }
 
@@ -101,7 +102,7 @@ section h2::after {
 
 .facility-item {
     padding: 30px 20px;
-    background: #f9f9f9;
+    background: #ffffff;
     border-radius: 12px;
     transition: transform 0.3s;
 }

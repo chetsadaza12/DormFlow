@@ -8,6 +8,22 @@ export default function GeneralSettings() {
     const [settings, setSettings] = useState(null);
     const [hasChanges, setHasChanges] = useState(false);
     const [expandedGroups, setExpandedGroups] = useState({}); // Stores which groups are expanded
+    
+    // Icon Picker State
+    const [showIconPicker, setShowIconPicker] = useState(false);
+    const [activeFacilityIndex, setActiveFacilityIndex] = useState(null);
+
+    // List of available icons in the public/assets/images folder
+    const availableIcons = [
+        '/assets/images/ปลอดภัย 24 ชม..gif',
+        '/assets/images/ที่จอดรถ.gif',
+        '/assets/images/Wi-Fi.gif',
+        '/assets/images/เฟอร์นิเจอร์ครบ.gif',
+        '/assets/images/checklist.gif',
+        '/assets/images/handshake.gif',
+        '/assets/images/ไอเดีย.gif',
+        '/assets/images/award.gif'
+    ];
 
     const toggleGroup = (index) => {
         setExpandedGroups(prev => ({
@@ -54,6 +70,27 @@ export default function GeneralSettings() {
             showToast('ไม่สามารถดึงข้อมูลตั้งค่าใหม่ได้', 'error');
         }
     }
+
+    // --- Facilities helpers ---
+    const getFacilities = () => {
+        return settings.homeFacilities || [];
+    };
+
+    const updateFacility = (index, field, value) => {
+        const facs = [...getFacilities()];
+        facs[index] = { ...facs[index], [field]: value };
+        handleChange('homeFacilities', facs);
+    };
+
+    const addFacility = () => {
+        const facs = [...getFacilities(), { title: '', description: '', icon: '' }];
+        handleChange('homeFacilities', facs);
+    };
+
+    const removeFacility = (index) => {
+        const facs = getFacilities().filter((_, i) => i !== index);
+        handleChange('homeFacilities', facs);
+    };
 
     const settingGroups = [
         {
@@ -180,6 +217,110 @@ export default function GeneralSettings() {
                                     )}
                                 </div>
                             ))}
+
+                            {/* Facilities Editor - only in Website group (index 0) */}
+                            {groupIndex === 0 && (
+                                <div className="setting-card glass-card facilities-editor-card">
+                                    <div className="setting-card-header">
+                                        <div className="setting-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <rect x="3" y="3" width="7" height="7" />
+                                                <rect x="14" y="3" width="7" height="7" />
+                                                <rect x="3" y="14" width="7" height="7" />
+                                                <rect x="14" y="14" width="7" height="7" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 className="setting-label">สิ่งอำนวยความสะดวก (Facilities)</h4>
+                                            <p className="setting-desc">จัดการรายการสิ่งอำนวยความสะดวกที่แสดงบนหน้า Home</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="facilities-list">
+                                        {getFacilities().map((fac, i) => (
+                                            <div className="facility-edit-item" key={i}>
+                                                <div 
+                                                    className="facility-edit-preview clickable" 
+                                                    onClick={() => {
+                                                        setActiveFacilityIndex(i);
+                                                        setShowIconPicker(true);
+                                                    }}
+                                                    title="คลิกเพื่อเปลี่ยนไอคอน"
+                                                >
+                                                    {fac.icon && fac.icon.startsWith('/') ? (
+                                                        <img src={fac.icon} alt={fac.title} className="facility-preview-img" />
+                                                    ) : (
+                                                        <span className="facility-preview-emoji">{fac.icon || '⭐'}</span>
+                                                    )}
+                                                </div>
+                                                <div className="facility-edit-fields">
+                                                    <input
+                                                        type="text"
+                                                        className="input setting-input"
+                                                        placeholder="ชื่อ (เช่น ฟรี Wi-Fi)"
+                                                        value={fac.title || ''}
+                                                        onChange={e => updateFacility(i, 'title', e.target.value)}
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        className="input setting-input"
+                                                        placeholder="คำอธิบาย (เช่น อินเทอร์เน็ตความเร็วสูง)"
+                                                        value={fac.description || ''}
+                                                        onChange={e => updateFacility(i, 'description', e.target.value)}
+                                                    />
+                                                    <div className="icon-input-wrapper">
+                                                        <input
+                                                            type="text"
+                                                            className="input setting-input icon-path-input"
+                                                            placeholder="คลิกเพื่อเลือกไอคอน หรือใส่ Emoji 📶"
+                                                            value={fac.icon || ''}
+                                                            onChange={e => updateFacility(i, 'icon', e.target.value)}
+                                                            onClick={() => {
+                                                                setActiveFacilityIndex(i);
+                                                                setShowIconPicker(true);
+                                                            }}
+                                                            readOnly
+                                                        />
+                                                        <button 
+                                                            className="icon-picker-trigger"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setActiveFacilityIndex(i);
+                                                                setShowIconPicker(true);
+                                                            }}
+                                                        >
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                                                <circle cx="8.5" cy="8.5" r="1.5" />
+                                                                <polyline points="21 15 16 10 5 21" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    className="facility-delete-btn" 
+                                                    onClick={() => removeFacility(i)}
+                                                    title="ลบรายการนี้"
+                                                >
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <polyline points="3 6 5 6 21 6" />
+                                                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <button className="facility-add-btn" onClick={addFacility}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <line x1="12" y1="8" x2="12" y2="16" />
+                                            <line x1="8" y1="12" x2="16" y2="12" />
+                                        </svg>
+                                        เพิ่มสิ่งอำนวยความสะดวก
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         )}
                     </div>
@@ -211,6 +352,38 @@ export default function GeneralSettings() {
                     ยกเลิกการเปลี่ยนแปลง
                 </button>
             </div>
+
+            {/* Icon Picker Modal */}
+            {showIconPicker && (
+                <div className="icon-picker-overlay" onClick={() => setShowIconPicker(false)}>
+                    <div className="icon-picker-modal" onClick={e => e.stopPropagation()}>
+                        <div className="icon-picker-header">
+                            <h3>เลือกไอคอนสำหรับสิ่งอำนวยความสะดวก</h3>
+                            <button className="icon-picker-close" onClick={() => setShowIconPicker(false)}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="icon-picker-grid">
+                            {availableIcons.map((iconPath, index) => (
+                                <div 
+                                    key={index}
+                                    className={`icon-picker-item ${getFacilities()[activeFacilityIndex]?.icon === iconPath ? 'selected' : ''}`}
+                                    onClick={() => {
+                                        updateFacility(activeFacilityIndex, 'icon', iconPath);
+                                        setShowIconPicker(false);
+                                    }}
+                                >
+                                    <img src={iconPath} alt={`Icon ${index}`} />
+                                    <span className="icon-name">{iconPath.split('/').pop().replace('.gif', '')}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

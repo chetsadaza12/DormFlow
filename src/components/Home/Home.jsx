@@ -8,6 +8,12 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
     const [homeHeroSubtitle, setHomeHeroSubtitle] = useState('ที่พักคุณภาพ สะอาด ปลอดภัย เดินทางสะดวกสบาย');
     const [homeContactPhone, setHomeContactPhone] = useState('092-5152-870 โก้ / 082-508-8909 พอล');
     const [homeContactLineId, setHomeContactLineId] = useState('narasing.dorm');
+    const [facilities, setFacilities] = useState([
+        { title: 'ปลอดภัย 24 ชม.', description: 'รปภ. และกล้องวงจรปิด ทุกชั้น', icon: '/assets/images/ปลอดภัย 24 ชม..gif' },
+        { title: 'ที่จอดรถ', description: 'กว้างขวาง ร่มรื่น เพียงพอต่อผู้เช่า', icon: '/assets/images/ที่จอดรถ.gif' },
+        { title: 'ฟรี Wi-Fi', description: 'อินเทอร์เน็ตความเร็วสูง ครอบคลุมทุกพื้นที่', icon: '/assets/images/Wi-Fi.gif' },
+        { title: 'เฟอร์นิเจอร์ครบ', description: 'พร้อมเข้าอยู่ได้ทันที ไม่ต้องซื้อเพิ่ม', icon: '/assets/images/เฟอร์นิเจอร์ครบ.gif' }
+    ]);
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -38,6 +44,9 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                     if (settingsObj.homeHeroSubtitle) setHomeHeroSubtitle(settingsObj.homeHeroSubtitle);
                     if (settingsObj.homeContactPhone) setHomeContactPhone(settingsObj.homeContactPhone);
                     if (settingsObj.homeContactLineId) setHomeContactLineId(settingsObj.homeContactLineId);
+                    if (settingsObj.homeFacilities && Array.isArray(settingsObj.homeFacilities)) {
+                        setFacilities(settingsObj.homeFacilities);
+                    }
                 }
                 
                 
@@ -78,26 +87,17 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
             <section className="facilities-section">
                 <h2>สิ่งอำนวยความสะดวกของเรา</h2>
                 <div className="facilities-grid">
-                    <div className="facility-item">
-                        <img className="facility-icon-gif" src="/assets/images/ปลอดภัย 24 ชม..gif" alt="ปลอดภัย 24 ชม." />
-                        <h3>ปลอดภัย 24 ชม.</h3>
-                        <p>รปภ. และกล้องวงจรปิด ทุกชั้น</p>
-                    </div>
-                    <div className="facility-item">
-                        <img className="facility-icon-gif" src="/assets/images/ที่จอดรถ.gif" alt="ที่จอดรถ" />
-                        <h3>ที่จอดรถ</h3>
-                        <p>กว้างขวาง ร่มรื่น เพียงพอต่อผู้เช่า</p>
-                    </div>
-                    <div className="facility-item">
-                        <img className="facility-icon-gif" src="/assets/images/Wi-Fi.gif" alt="Wi-Fi" />
-                        <h3>ฟรี Wi-Fi</h3>
-                        <p>อินเทอร์เน็ตความเร็วสูง ครอบคลุมทุกพื้นที่</p>
-                    </div>
-                    <div className="facility-item">
-                        <img className="facility-icon-gif" src="/assets/images/เฟอร์นิเจอร์ครบ.gif" alt="เฟอร์นิเจอร์ครบ" />
-                        <h3>เฟอร์นิเจอร์ครบ</h3>
-                        <p>พร้อมเข้าอยู่ได้ทันที ไม่ต้องซื้อเพิ่ม</p>
-                    </div>
+                    {facilities.map((facility, index) => (
+                        <div className="facility-item" key={index}>
+                            {facility.icon && facility.icon.startsWith('/') ? (
+                                <img className="facility-icon-gif" src={facility.icon} alt={facility.title} />
+                            ) : (
+                                <span className="facility-icon">{facility.icon || '⭐'}</span>
+                            )}
+                            <h3>{facility.title}</h3>
+                            <p>{facility.description}</p>
+                        </div>
+                    ))}
                 </div>
             </section>
 
