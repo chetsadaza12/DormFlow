@@ -22,7 +22,14 @@ export default function GeneralSettings() {
         '/assets/images/checklist.gif',
         '/assets/images/handshake.gif',
         '/assets/images/ไอเดีย.gif',
-        '/assets/images/award.gif'
+        '/assets/images/award.gif',
+        '/assets/images/clock About.gif',
+        '/assets/images/graduation-cap About.gif',
+        '/assets/images/loyalty About.gif',
+        '/assets/images/paper-document About.gif',
+        '/assets/images/output-onlinegiftools.gif',
+        '/assets/images/output-onlinegiftools (1).gif',
+        '/assets/images/output-onlinegiftools (2).gif'
     ];
 
     const toggleGroup = (index) => {
@@ -268,34 +275,21 @@ export default function GeneralSettings() {
                                                         value={fac.description || ''}
                                                         onChange={e => updateFacility(i, 'description', e.target.value)}
                                                     />
-                                                    <div className="icon-input-wrapper">
-                                                        <input
-                                                            type="text"
-                                                            className="input setting-input icon-path-input"
-                                                            placeholder="คลิกเพื่อเลือกไอคอน หรือใส่ Emoji 📶"
-                                                            value={fac.icon || ''}
-                                                            onChange={e => updateFacility(i, 'icon', e.target.value)}
-                                                            onClick={() => {
-                                                                setActiveFacilityIndex(i);
-                                                                setShowIconPicker(true);
-                                                            }}
-                                                            readOnly
-                                                        />
-                                                        <button 
-                                                            className="icon-picker-trigger"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                setActiveFacilityIndex(i);
-                                                                setShowIconPicker(true);
-                                                            }}
-                                                        >
-                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                                                <circle cx="8.5" cy="8.5" r="1.5" />
-                                                                <polyline points="21 15 16 10 5 21" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
+                                                    <button 
+                                                        className="facility-select-icon-btn"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setActiveFacilityIndex(i);
+                                                            setShowIconPicker(true);
+                                                        }}
+                                                    >
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                                            <polyline points="21 15 16 10 5 21" />
+                                                        </svg>
+                                                        เลือกไอคอน
+                                                    </button>
                                                 </div>
                                                 <button 
                                                     className="facility-delete-btn" 

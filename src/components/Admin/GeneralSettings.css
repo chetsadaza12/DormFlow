@@ -326,40 +326,29 @@ textarea.setting-input {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-.icon-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.icon-path-input {
-    flex: 1;
-    padding-right: 40px !important;
-    cursor: pointer;
-    background-color: var(--bg-input) !important;
-}
-
-.icon-picker-trigger {
-    position: absolute;
-    right: 8px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-muted);
-    padding: 6px;
-    border-radius: var(--radius-sm);
+.facility-select-icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    cursor: pointer;
     transition: all 0.2s;
+    font-size: 0.9rem;
+    height: 42px; /* Match input height */
 }
 
-.icon-picker-trigger:hover {
+.facility-select-icon-btn:hover {
+    background: rgba(59, 130, 246, 0.05);
+    border-color: var(--accent);
     color: var(--accent);
-    background: rgba(59, 130, 246, 0.1);
 }
 
-.icon-picker-trigger svg {
+.facility-select-icon-btn svg {
     width: 18px;
     height: 18px;
 }
