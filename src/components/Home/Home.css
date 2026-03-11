@@ -137,7 +137,7 @@ section h2::after {
 }
 
 /* Room Status Dashboard */
-.room-status-section {
+.home-page .room-status-section {
     background-color: #f8fafc;
     background-image: radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.05) 0, transparent 50%), radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.05) 0, transparent 50%);
     max-width: 100%;
