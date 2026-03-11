@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { settingsAPI } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
+import MapPicker from './MapPicker';
 import './GeneralSettings.css';
 
 export default function GeneralSettings() {
@@ -12,6 +13,7 @@ export default function GeneralSettings() {
     // Icon Picker State
     const [showIconPicker, setShowIconPicker] = useState(false);
     const [activeFacilityIndex, setActiveFacilityIndex] = useState(null);
+    const [showMapPicker, setShowMapPicker] = useState(false);
 
     // List of available icons in the public/assets/images folder
     const availableIcons = [
@@ -130,6 +132,34 @@ export default function GeneralSettings() {
                     description: 'ไอดีไลน์ที่แสดงในส่วนติดต่อเราบนหน้า Home',
                     type: 'text',
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                },
+                {
+                    key: 'homeContactBadge',
+                    label: 'ป้ายกำกับ (Badge)',
+                    description: 'ข้อความเล็กๆ ด้านบนหัวข้อส่วนติดต่อ เช่น "ติดต่อเรา"',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
+                },
+                {
+                    key: 'homeContactHeading',
+                    label: 'หัวข้อส่วนติดต่อ',
+                    description: 'ข้อความหัวข้อหลัก เช่น "พร้อมให้บริการทุกวัน" (ใช้ \\n เพื่อขึ้นบรรทัดใหม่)',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" y1="20" x2="15" y2="20" /><line x1="12" y1="4" x2="12" y2="20" /></svg>
+                },
+                {
+                    key: 'homeContactSubtitle',
+                    label: 'คำอธิบายส่วนติดต่อ',
+                    description: 'ข้อความอธิบายใต้หัวข้อ เช่น "สนใจจองห้องพัก ติดต่อเราได้เลย!"',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="17" y1="10" x2="3" y2="10" /><line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="14" x2="3" y2="14" /><line x1="17" y1="18" x2="3" y2="18" /></svg>
+                },
+                {
+                    key: 'homeMapLocation',
+                    label: 'ตำแหน่งแผนที่ Google Maps',
+                    description: 'คลิกปุ่มด้านล่างเพื่อปักหมุดตำแหน่งที่ตั้งหอพักบนแผนที่',
+                    type: 'map',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
                 }
             ]
         },
@@ -214,6 +244,31 @@ export default function GeneralSettings() {
                                             onChange={e => handleChange(field.key, e.target.value)}
                                             rows={3}
                                         />
+                                    ) : field.type === 'map' ? (
+                                        <div className="map-setting-field">
+                                            <div className="map-coords-display">
+                                                {settings.homeMapLocation?.lat ? (
+                                                    <span className="coords-text">
+                                                        📌 Lat: <strong>{Number(settings.homeMapLocation.lat).toFixed(4)}</strong>, Lng: <strong>{Number(settings.homeMapLocation.lng).toFixed(4)}</strong>
+                                                    </span>
+                                                ) : (
+                                                    <span className="coords-text muted">ยังไม่ได้ระบุตำแหน่ง</span>
+                                                )}
+                                            </div>
+                                            <button 
+                                                className="map-pin-btn"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setShowMapPicker(true);
+                                                }}
+                                            >
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                                    <circle cx="12" cy="10" r="3" />
+                                                </svg>
+                                                ปักหมุดบนแผนที่
+                                            </button>
+                                        </div>
                                     ) : (
                                         <input
                                             type="text"
@@ -377,6 +432,18 @@ export default function GeneralSettings() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Map Picker Modal */}
+            {showMapPicker && (
+                <MapPicker
+                    lat={settings.homeMapLocation?.lat || 14.8829}
+                    lng={settings.homeMapLocation?.lng || 102.0196}
+                    onLocationChange={(lat, lng) => {
+                        handleChange('homeMapLocation', { lat, lng });
+                    }}
+                    onClose={() => setShowMapPicker(false)}
+                />
             )}
         </div>
     );

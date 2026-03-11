@@ -8,6 +8,7 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
     const [homeHeroSubtitle, setHomeHeroSubtitle] = useState('ที่พักคุณภาพ สะอาด ปลอดภัย เดินทางสะดวกสบาย');
     const [homeContactPhone, setHomeContactPhone] = useState('092-5152-870 โก้ / 082-508-8909 พอล');
     const [homeContactLineId, setHomeContactLineId] = useState('narasing.dorm');
+    const [homeMapLocation, setHomeMapLocation] = useState({ lat: 14.8829, lng: 102.0196 });
     const [facilities, setFacilities] = useState([
         { title: 'ปลอดภัย 24 ชม.', description: 'รปภ. และกล้องวงจรปิด ทุกชั้น', icon: '/assets/images/ปลอดภัย 24 ชม..gif' },
         { title: 'ที่จอดรถ', description: 'กว้างขวาง ร่มรื่น เพียงพอต่อผู้เช่า', icon: '/assets/images/ที่จอดรถ.gif' },
@@ -44,6 +45,7 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                     if (settingsObj.homeHeroSubtitle) setHomeHeroSubtitle(settingsObj.homeHeroSubtitle);
                     if (settingsObj.homeContactPhone) setHomeContactPhone(settingsObj.homeContactPhone);
                     if (settingsObj.homeContactLineId) setHomeContactLineId(settingsObj.homeContactLineId);
+                    if (settingsObj.homeMapLocation) setHomeMapLocation(settingsObj.homeMapLocation);
                     if (settingsObj.homeFacilities && Array.isArray(settingsObj.homeFacilities)) {
                         setFacilities(settingsObj.homeFacilities);
                     }
@@ -195,26 +197,49 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                 )}
             </section>
 
-            {/* Contact Section */}
-            <section id="contact" className="contact-section">
-                <h2>ติดต่อสอบถาม / จองห้องพัก</h2>
-                <div className="contact-info">
-                    <div className="contact-card modern">
-                        <div className="contact-icon">📞</div>
-                        <h3>โทรศัพท์</h3>
-                        <p>{homeContactPhone}</p>
+            {/* Contact & Map Section - Premium Design */}
+            <section id="contact" className="contact-map-section">
+                <div className="contact-map-wrapper">
+                    {/* Left: Contact Info Panel */}
+                    <div className="contact-panel">
+                        <div className="contact-panel-header">
+                            <span className="contact-badge">ติดต่อเรา</span>
+                            <h2>พร้อมให้บริการ<br/>ทุกวัน</h2>
+                            <p className="contact-subtitle">สนใจจองห้องพัก สอบถามรายละเอียดเพิ่มเติม ติดต่อเราได้เลย!</p>
+                        </div>
+                        <div className="contact-items">
+                            <a href={`tel:${homeContactPhone.split(' ')[0]}`} className="contact-item-card">
+                                <div className="contact-item-info">
+                                    <span className="contact-item-label">โทรศัพท์</span>
+                                    <span className="contact-item-value">{homeContactPhone}</span>
+                                </div>
+                                <span className="contact-item-arrow">→</span>
+                            </a>
+                            <a href={`https://line.me/R/ti/p/@${homeContactLineId}`} target="_blank" rel="noopener noreferrer" className="contact-item-card">
+                                <div className="contact-item-info">
+                                    <span className="contact-item-label">LINE ID</span>
+                                    <span className="contact-item-value line-value">{homeContactLineId}</span>
+                                </div>
+                                <span className="contact-item-arrow">→</span>
+                            </a>
+                            <div className="contact-item-card">
+                                <div className="contact-item-info">
+                                    <span className="contact-item-label">ที่ตั้ง</span>
+                                    <span className="contact-item-value">{businessName}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="contact-card modern">
-                        <div className="contact-icon">💬</div>
-                        <h3>LINE ID</h3>
-                        <p className="highlight-text">{homeContactLineId}</p>
-                        <p className="hint">แอดไลน์เพื่อสอบถามรายละเอียด</p>
-                    </div>
-                    <div className="contact-card modern">
-                        <div className="contact-icon">📍</div>
-                        <h3>ที่ตั้ง</h3>
-                        <p>{businessName}</p>
-                        <p className="hint">แผนที่ Google Maps</p>
+                    {/* Right: Map */}
+                    <div className="map-panel">
+                        <iframe 
+                            title="Location Map"
+                            className="map-iframe"
+                            loading="lazy" 
+                            allowFullScreen 
+                            referrerPolicy="no-referrer-when-downgrade" 
+                            src={`https://maps.google.com/maps?q=${homeMapLocation?.lat || 14.8829},${homeMapLocation?.lng || 102.0196}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+                        ></iframe>
                     </div>
                 </div>
             </section>

@@ -22,6 +22,10 @@ settingsSchema.statics.defaults = {
     homeHeroSubtitle: 'ที่พักคุณภาพ สะอาด ปลอดภัย เดินทางสะดวกสบาย',
     homeContactPhone: '092-5152-870 โก้ / 082-508-8909 พอล',
     homeContactLineId: 'narasing.dorm',
+    homeContactBadge: 'ติดต่อเรา',
+    homeContactHeading: 'พร้อมให้บริการ\nทุกวัน',
+    homeContactSubtitle: 'สนใจจองห้องพัก สอบถามรายละเอียดเพิ่มเติม ติดต่อเราได้เลย!',
+    homeMapLocation: { lat: 14.8829, lng: 102.0196 },
     homeFacilities: [
         { title: 'ปลอดภัย 24 ชม.', description: 'รปภ. และกล้องวงจรปิด ทุกชั้น', icon: '/assets/images/ปลอดภัย 24 ชม..gif' },
         { title: 'ที่จอดรถ', description: 'กว้างขวาง ร่มรื่น เพียงพอต่อผู้เช่า', icon: '/assets/images/ที่จอดรถ.gif' },
