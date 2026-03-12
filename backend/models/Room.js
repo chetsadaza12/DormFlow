@@ -39,6 +39,10 @@ const roomSchema = new mongoose.Schema({
     isOccupied: {
         type: Boolean,
         default: true
+    },
+    amenities: {
+        type: [String],
+        default: ['aircon', 'bed', 'waterheater', 'wifi']
     }
 }, {
     timestamps: true

@@ -42,7 +42,17 @@ settingsSchema.statics.defaults = {
     // Pricing
     waterRate: 18,
     electricRate: 8,
-    roomRent: 0
+    roomRent: 0,
+
+    // Amenities options
+    roomAmenities: [
+        { id: 'aircon', label: 'แอร์', icon: '❄️' },
+        { id: 'bed', label: 'เตียง', icon: '🛏️' },
+        { id: 'waterheater', label: 'น้ำอุ่น', icon: '🚿' },
+        { id: 'wifi', label: 'WiFi', icon: '📶' },
+        { id: 'tv', label: 'ทีวี', icon: '📺' },
+        { id: 'fridge', label: 'ตู้เย็น', icon: '🧊' }
+    ]
 };
 
 // Get all settings as a flat object

@@ -101,6 +101,31 @@ export default function GeneralSettings() {
         handleChange('homeFacilities', facs);
     };
 
+    // --- Amenities helpers ---
+    const getAmenities = () => {
+        return settings.roomAmenities || [];
+    };
+
+    const updateAmenity = (index, field, value) => {
+        const ams = [...getAmenities()];
+        ams[index] = { ...ams[index], [field]: value };
+        // auto-generate ID if title changed and no id exists
+        if (field === 'label' && !ams[index].id) {
+            ams[index].id = value.toLowerCase().replace(/[^a-z0-9ก-ฮ]/g, '') || `am_${Date.now()}`;
+        }
+        handleChange('roomAmenities', ams);
+    };
+
+    const addAmenity = () => {
+        const ams = [...getAmenities(), { id: `am_${Date.now()}`, label: '', icon: '' }];
+        handleChange('roomAmenities', ams);
+    };
+
+    const removeAmenity = (index) => {
+        const ams = getAmenities().filter((_, i) => i !== index);
+        handleChange('roomAmenities', ams);
+    };
+
     const settingGroups = [
         {
             title: 'ตั้งค่าหน้าหลัก (เว็บไซต์)',
@@ -367,6 +392,65 @@ export default function GeneralSettings() {
                                             <line x1="8" y1="12" x2="16" y2="12" />
                                         </svg>
                                         เพิ่มสิ่งอำนวยความสะดวก
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Room Amenities Editor - also in Website group (index 0) or create its own place */}
+                            {groupIndex === 0 && (
+                                <div className="setting-card glass-card amenities-editor-card" style={{ marginTop: '20px' }}>
+                                    <div className="setting-card-header">
+                                        <div className="setting-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 className="setting-label">สิ่งอำนวยความสะดวกในห้องพัก (Room Amenities)</h4>
+                                            <p className="setting-desc">จัดการรายการสิ่งอำนวยความสะดวกที่แสดงให้เจ้าของเลือกและการ์ดห้องพัก</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="facilities-list" style={{ marginTop: '15px' }}>
+                                        {getAmenities().map((am, i) => (
+                                            <div className="facility-edit-item" key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                <input
+                                                    type="text"
+                                                    className="input setting-input"
+                                                    placeholder="ไอคอน (Emoji เช่น ❄️)"
+                                                    value={am.icon || ''}
+                                                    onChange={e => updateAmenity(i, 'icon', e.target.value)}
+                                                    style={{ width: '80px', textAlign: 'center' }}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    className="input setting-input"
+                                                    placeholder="ชื่อ (เช่น แอร์, เตียง)"
+                                                    value={am.label || ''}
+                                                    onChange={e => updateAmenity(i, 'label', e.target.value)}
+                                                    style={{ flex: 1 }}
+                                                />
+                                                <button 
+                                                    className="facility-delete-btn" 
+                                                    onClick={() => removeAmenity(i)}
+                                                    title="ลบรายการนี้"
+                                                >
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <polyline points="3 6 5 6 21 6" />
+                                                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <button className="facility-add-btn" onClick={addAmenity} style={{ marginTop: '15px' }}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <line x1="12" y1="8" x2="12" y2="16" />
+                                            <line x1="8" y1="12" x2="16" y2="12" />
+                                        </svg>
+                                        เพิ่มสิ่งอำนวยความสะดวกใหม่
                                     </button>
                                 </div>
                             )}

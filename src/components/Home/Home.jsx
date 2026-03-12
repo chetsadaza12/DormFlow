@@ -4,6 +4,7 @@ import './Home.css';
 
 const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
     const [allRooms, setAllRooms] = useState([]);
+    const [availableAmenities, setAvailableAmenities] = useState([]);
     const [businessName, setBusinessName] = useState('หอพักนรสิงห์');
     const [homeHeroSubtitle, setHomeHeroSubtitle] = useState('ที่พักคุณภาพ สะอาด ปลอดภัย เดินทางสะดวกสบาย');
     const [homeContactPhone, setHomeContactPhone] = useState('092-5152-870 โก้ / 082-508-8909 พอล');
@@ -48,6 +49,9 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                     if (settingsObj.homeMapLocation) setHomeMapLocation(settingsObj.homeMapLocation);
                     if (settingsObj.homeFacilities && Array.isArray(settingsObj.homeFacilities)) {
                         setFacilities(settingsObj.homeFacilities);
+                    }
+                    if (settingsObj.roomAmenities && Array.isArray(settingsObj.roomAmenities)) {
+                        setAvailableAmenities(settingsObj.roomAmenities);
                     }
                 }
                 
@@ -173,10 +177,14 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                                                                 <span className="period">/ เดือน</span>
                                                             </div>
                                                             <div className="amenities-list">
-                                                                <span className="amenity" title="เครื่องปรับอากาศ"><i className="icon-ac">❄️</i> แอร์</span>
-                                                                <span className="amenity" title="เตียงนอน"><i className="icon-bed">🛏️</i> เตียง</span>
-                                                                <span className="amenity" title="เครื่องทำน้ำอุ่น"><i className="icon-heater">🚿</i> น้ำอุ่น</span>
-                                                                <span className="amenity" title="ฟรี WiFi"><i className="icon-wifi">📶</i> WiFi</span>
+                                                                {(room.amenities && room.amenities.length > 0 ? room.amenities : ['aircon', 'bed', 'waterheater', 'wifi']).map(amId => {
+                                                                    const info = availableAmenities.find(a => a.id === amId) || { id: amId, label: amId, icon: '✨', title: amId };
+                                                                    return (
+                                                                        <span key={amId} className="amenity" title={info.title || info.label}>
+                                                                            <i className="icon-am">{info.icon}</i> {info.label}
+                                                                        </span>
+                                                                    );
+                                                                })}
                                                             </div>
                                                             <a href="#contact" className="action-btn modern-btn">สนใจจองห้องนี้</a>
                                                         </>

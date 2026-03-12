@@ -5,12 +5,13 @@ import './RoomManager.css';
 
 export default function RoomManager() {
     const [rooms, setRooms] = useState([]);
+    const [availableAmenities, setAvailableAmenities] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [editingRoom, setEditingRoom] = useState(null);
     const [formData, setFormData] = useState({
         roomNumber: '', tenantName: '', lastWaterMeter: 0,
         lastElectricMeter: 0, waterRate: 18, electricRate: 8,
-        roomRent: 0, isOccupied: true
+        roomRent: 0, isOccupied: true, amenities: ['aircon', 'bed', 'waterheater', 'wifi']
     });
     const [error, setError] = useState('');
     const { showToast, showConfirm } = useNotification();
@@ -26,7 +27,18 @@ export default function RoomManager() {
 
     async function loadData() {
         try {
-            const data = await roomAPI.getAll();
+            const [data, settingsObj] = await Promise.all([
+                roomAPI.getAll(),
+                settingsAPI.get()
+            ]);
+            
+            if (settingsObj && settingsObj.roomAmenities) {
+                setAvailableAmenities(settingsObj.roomAmenities);
+            } else {
+                // Default fallback pattern if empty
+                setAvailableAmenities([{ id: 'aircon', label: 'แอร์', icon: '❄️' }]);
+            }
+
             // Sort naturally (A1, A2... A10) instead of alphabetically
             const sortedData = [...data].sort((a, b) =>
                 a.roomNumber.localeCompare(b.roomNumber, undefined, { numeric: true, sensitivity: 'base' })
@@ -44,7 +56,7 @@ export default function RoomManager() {
             setFormData({
                 roomNumber: '', tenantName: '', lastWaterMeter: 0,
                 lastElectricMeter: 0, waterRate: rates.waterRate, electricRate: rates.electricRate,
-                roomRent: 0, isOccupied: true
+                roomRent: 0, isOccupied: true, amenities: ['aircon', 'bed', 'waterheater', 'wifi']
             });
             setError('');
             setShowModal(true);
@@ -55,7 +67,10 @@ export default function RoomManager() {
 
     function openEditModal(room) {
         setEditingRoom(room.roomNumber);
-        setFormData({ ...room });
+        setFormData({ 
+            ...room,
+            amenities: room.amenities || []
+        });
         setError('');
         setShowModal(true);
     }
@@ -100,6 +115,17 @@ export default function RoomManager() {
 
     function handleChange(field, value) {
         setFormData(prev => ({ ...prev, [field]: value }));
+    }
+
+    function toggleAmenity(amenityId) {
+        setFormData(prev => {
+            const current = prev.amenities || [];
+            if (current.includes(amenityId)) {
+                return { ...prev, amenities: current.filter(id => id !== amenityId) };
+            } else {
+                return { ...prev, amenities: [...current, amenityId] };
+            }
+        });
     }
 
     // ============ SEARCH & PAGINATION COMPUTATION ============
@@ -304,6 +330,22 @@ export default function RoomManager() {
                                         <option value="true">มีคนเช่า</option>
                                         <option value="false">ว่าง</option>
                                     </select>
+                                </div>
+                                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                                    <label>สิ่งอำนวยความสะดวก</label>
+                                    <div className="amenities-checkbox-grid" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginTop: '10px' }}>
+                                        {availableAmenities.map(amenity => (
+                                            <label key={amenity.id} style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', background: 'var(--bg-card)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={(formData.amenities || []).includes(amenity.id)} 
+                                                    onChange={() => toggleAmenity(amenity.id)}
+                                                    style={{ transform: 'scale(1.2)' }}
+                                                />
+                                                <span>{amenity.icon} {amenity.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
