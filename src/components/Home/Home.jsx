@@ -171,22 +171,26 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                                                 <div className="room-details-modern">
                                                     {isAvailable ? (
                                                         <>
-                                                            <div className="price-tag">
-                                                                <span className="currency">฿</span>
-                                                                <span className="amount">{room.roomRent.toLocaleString()}</span>
-                                                                <span className="period">/ เดือน</span>
+                                                            <div className="room-info-top" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                                                                <div className="price-tag">
+                                                                    <span className="currency">฿</span>
+                                                                    <span className="amount">{room.roomRent.toLocaleString()}</span>
+                                                                    <span className="period">/ เดือน</span>
+                                                                </div>
+                                                                <div className="amenities-list">
+                                                                    {(room.amenities && room.amenities.length > 0 ? room.amenities : ['aircon', 'bed', 'waterheater', 'wifi']).map(amId => {
+                                                                        const info = availableAmenities.find(a => a.id === amId) || { id: amId, label: amId, icon: '✨', title: amId };
+                                                                        return (
+                                                                            <span key={amId} className="amenity" title={info.title || info.label}>
+                                                                                <i className="icon-am">{info.icon}</i> {info.label}
+                                                                            </span>
+                                                                        );
+                                                                    })}
+                                                                </div>
                                                             </div>
-                                                            <div className="amenities-list">
-                                                                {(room.amenities && room.amenities.length > 0 ? room.amenities : ['aircon', 'bed', 'waterheater', 'wifi']).map(amId => {
-                                                                    const info = availableAmenities.find(a => a.id === amId) || { id: amId, label: amId, icon: '✨', title: amId };
-                                                                    return (
-                                                                        <span key={amId} className="amenity" title={info.title || info.label}>
-                                                                            <i className="icon-am">{info.icon}</i> {info.label}
-                                                                        </span>
-                                                                    );
-                                                                })}
+                                                            <div className="room-action-bottom">
+                                                                <a href="#contact" className="action-btn modern-btn">สนใจจองห้องนี้</a>
                                                             </div>
-                                                            <a href="#contact" className="action-btn modern-btn">สนใจจองห้องนี้</a>
                                                         </>
                                                     ) : (
                                                         <div className="occupied-state">

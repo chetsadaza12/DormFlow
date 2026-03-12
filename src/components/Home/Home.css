@@ -305,6 +305,7 @@ section h2::after {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 30px;
     padding: 10px;
+    align-items: stretch;
 }
 
 .room-card.modern {
@@ -318,6 +319,7 @@ section h2::after {
     display: flex;
     flex-direction: column;
     animation: fadeInUp 0.5s ease-out backwards;
+    min-height: 280px;
 }
 
 .room-card.modern:hover {
@@ -448,6 +450,8 @@ section h2::after {
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 25px;
+    min-height: 70px;
+    align-content: flex-start;
 }
 
 .amenity {
@@ -481,7 +485,6 @@ section h2::after {
     font-weight: 700;
     font-size: 1.05rem;
     transition: all 0.3s ease;
-    margin-top: auto;
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25);
     position: relative;
     overflow: hidden;
@@ -522,8 +525,9 @@ section h2::after {
     align-items: center;
     justify-content: center;
     flex-grow: 1;
-    color: #059669; /* Green text */
-    padding: 20px 0;
+    color: #059669;
+    padding: 30px 0;
+    min-height: 140px;
 }
 
 .occupied-icon {
