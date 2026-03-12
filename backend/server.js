@@ -1,7 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import dns from 'dns';
 import connectDB from './config/db.js';
+
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 // Routes
 import roomRoutes from './routes/roomRoutes.js';
