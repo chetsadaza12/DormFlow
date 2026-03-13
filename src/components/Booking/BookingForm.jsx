@@ -15,6 +15,7 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
     const [slipPreview, setSlipPreview] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [showPaymentInfo, setShowPaymentInfo] = useState(false);
     const [error, setError] = useState('');
     const fileInputRef = useRef(null);
 
@@ -158,6 +159,43 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
                                     placeholder="มีอะไรอยากสอบถามเพิ่มเติม..."
                                     rows={3}
                                 />
+                            </div>
+
+                            {/* Payment Info Toggle */}
+                            <div className="booking-field full-width">
+                                <button
+                                    type="button"
+                                    className="payment-toggle-btn"
+                                    onClick={() => setShowPaymentInfo(!showPaymentInfo)}
+                                >
+                                    <span className="payment-toggle-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                                    </span>
+                                    {showPaymentInfo ? 'ซ่อนช่องทางการชำระเงิน' : 'ดูช่องทางการชำระเงินมัดจำ (500 บาท)'}
+                                    <svg className={`chevron ${showPaymentInfo ? 'up' : 'down'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+                                </button>
+                                
+                                {showPaymentInfo && (
+                                    <div className="payment-info-box fade-in">
+                                        <div className="payment-method">
+                                            <div className="bank-icon kbank">K</div>
+                                            <div className="payment-details">
+                                                <span className="payment-title">ธนาคารกสิกรไทย (KBank)</span>
+                                                <span className="payment-acc">012-3-45678-9</span>
+                                                <span className="payment-name">ชื่อบัญชี: หอพักนรสิงห์</span>
+                                            </div>
+                                        </div>
+                                        <div className="payment-divider"></div>
+                                        <div className="payment-method promptpay-method">
+                                            <div className="payment-details promptpay-details">
+                                                <span className="payment-title">พร้อมเพย์ (PromptPay) QR Code</span>
+                                                {/* ใส่ Path รูปภาพ QR Code ตรงนี้ */}
+                                                <img src="/qr-promptpay.png" alt="QR Code PromptPay" className="promptpay-qr-img" />
+                                                <span className="payment-name">ชื่อ-สกุล: นายนรสิงห์ ใจดี</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Deposit Slip Upload */}

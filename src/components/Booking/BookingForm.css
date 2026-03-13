@@ -161,6 +161,160 @@
     min-height: 80px;
 }
 
+/* Payment Info Box */
+.payment-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    color: #475569;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 4px;
+}
+
+.payment-toggle-btn:hover {
+    background: #f1f5f9;
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.payment-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+.payment-toggle-btn:hover .payment-toggle-icon {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.payment-toggle-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.payment-toggle-btn .chevron {
+    width: 18px;
+    height: 18px;
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.payment-toggle-btn .chevron.up {
+    transform: rotate(180deg);
+}
+
+.payment-info-box {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.payment-method {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.promptpay-method {
+    justify-content: center;
+    text-align: center;
+}
+
+.bank-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.bank-icon.kbank {
+    background: #10ca73; /* KBank green */
+}
+
+.payment-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.promptpay-details {
+    align-items: center;
+}
+
+.payment-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.payment-acc {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: 0.5px;
+}
+
+.payment-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.promptpay-qr-img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+.payment-divider {
+    height: 1px;
+    background: #e2e8f0;
+    width: 100%;
+}
+
 /* Slip Upload */
 .slip-upload-area {
     margin-top: 4px;
