@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { roomAPI, settingsAPI } from '../../services/api';
+import BookingForm from '../Booking/BookingForm';
 import './Home.css';
 
 const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
@@ -20,6 +21,7 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedFilter, setSelectedFilter] = useState(null); // null | 'all' | 'available' | 'occupied'
+    const [bookingRoom, setBookingRoom] = useState(null); // room number for booking modal
 
     const handleFilterClick = (filterType) => {
         setSelectedFilter(prev => prev === filterType ? null : filterType);
@@ -189,7 +191,7 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                                                                 </div>
                                                             </div>
                                                             <div className="room-action-bottom">
-                                                                <a href="#contact" className="action-btn modern-btn">สนใจจองห้องนี้</a>
+                                                                <button onClick={() => setBookingRoom(room.roomNumber)} className="action-btn modern-btn">สนใจจองห้องนี้</button>
                                                             </div>
                                                         </>
                                                     ) : (
@@ -265,6 +267,15 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                     <button onClick={onNavigateToAdmin} className="text-btn">ระบบจัดการ(Admin)</button>
                 </div>
             </footer>
+
+            {/* Booking Modal */}
+            {bookingRoom && (
+                <BookingForm
+                    roomNumber={bookingRoom}
+                    onClose={() => setBookingRoom(null)}
+                    onSuccess={() => {}}
+                />
+            )}
         </div>
     );
 };

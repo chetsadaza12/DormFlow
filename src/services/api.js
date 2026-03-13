@@ -102,3 +102,25 @@ export const settingsAPI = {
         body: JSON.stringify(rates)
     })
 };
+
+// ========== BOOKING API ==========
+
+export const bookingAPI = {
+    getAll: () => request('/bookings'),
+
+    create: (data) => request('/bookings', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    }),
+
+    updateStatus: (id, status) => request(`/bookings/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status })
+    }),
+
+    delete: (id) => request(`/bookings/${id}`, {
+        method: 'DELETE'
+    }),
+
+    getStats: () => request('/bookings/stats')
+};
