@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { bookingAPI } from '../../services/api';
+import { useState, useRef, useEffect } from 'react';
+import { bookingAPI, settingsAPI, resolveAssetUrl } from '../../services/api';
 import './BookingForm.css';
 
 export default function BookingForm({ roomNumber, onClose, onSuccess }) {
@@ -18,6 +18,48 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
     const [showPaymentInfo, setShowPaymentInfo] = useState(false);
     const [error, setError] = useState('');
     const fileInputRef = useRef(null);
+    const [paymentSettings, setPaymentSettings] = useState({
+        bookingDepositAmount: 500,
+        bookingDepositToggleLabel: 'ดูช่องทางการชำระเงินมัดจำ (500 บาท)',
+        bookingDepositSlipLabel: 'สลิปโอนเงินมัดจำ 500 บาท',
+        bookingDepositNote: 'ค่ามัดจำ 500 บาท จะถูกหักจากค่าเช่าเดือนแรก',
+        bookingPaymentBankLabel: 'ธนาคารกสิกรไทย (KBank)',
+        bookingPaymentBankAccount: '012-3-45678-9',
+        bookingPaymentBankAccountName: 'หอพักนรสิงห์',
+        bookingPaymentBankIconText: 'K',
+        bookingPaymentBankIconImage: '',
+        bookingPromptpayTitle: 'พร้อมเพย์ (PromptPay) QR Code',
+        bookingPromptpayImage: '/qr-promptpay.png',
+        bookingPromptpayName: 'นายนรสิงห์ ใจดี'
+    });
+
+    useEffect(() => {
+        async function loadSettings() {
+            try {
+                const settings = await settingsAPI.get();
+                setPaymentSettings(prev => ({
+                    ...prev,
+                    bookingDepositAmount: settings.bookingDepositAmount ?? prev.bookingDepositAmount,
+                    bookingDepositToggleLabel: settings.bookingDepositToggleLabel ?? prev.bookingDepositToggleLabel,
+                    bookingDepositSlipLabel: settings.bookingDepositSlipLabel ?? prev.bookingDepositSlipLabel,
+                    bookingDepositNote: settings.bookingDepositNote ?? prev.bookingDepositNote,
+                    bookingPaymentBankLabel: settings.bookingPaymentBankLabel ?? prev.bookingPaymentBankLabel,
+                    bookingPaymentBankAccount: settings.bookingPaymentBankAccount ?? prev.bookingPaymentBankAccount,
+                    bookingPaymentBankAccountName: settings.bookingPaymentBankAccountName ?? prev.bookingPaymentBankAccountName,
+                    bookingPaymentBankIconText: settings.bookingPaymentBankIconText ?? prev.bookingPaymentBankIconText,
+                    bookingPaymentBankIconImage: settings.bookingPaymentBankIconImage ?? prev.bookingPaymentBankIconImage,
+                    bookingPromptpayTitle: settings.bookingPromptpayTitle ?? prev.bookingPromptpayTitle,
+                    bookingPromptpayImage: settings.bookingPromptpayImage ?? prev.bookingPromptpayImage,
+                    bookingPromptpayName: settings.bookingPromptpayName ?? prev.bookingPromptpayName
+                }));
+            } catch (e) {
+                // ถ้าดึงการตั้งค่าไม่ได้ ให้ใช้ค่าเริ่มต้นต่อไป
+                console.error('ไม่สามารถโหลดการตั้งค่าการจองได้', e);
+            }
+        }
+
+        loadSettings();
+    }, []);
 
     function handleChange(e) {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -58,7 +100,8 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
         }
 
         if (!slipFile) {
-            setError('กรุณาแนบสลิปโอนเงินมัดจำ 500 บาท');
+            const amount = paymentSettings.bookingDepositAmount || 500;
+            setError(`กรุณาแนบสลิปโอนเงินมัดจำ ${amount} บาท`);
             return;
         }
 
@@ -171,27 +214,35 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
                                     <span className="payment-toggle-icon">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
                                     </span>
-                                    {showPaymentInfo ? 'ซ่อนช่องทางการชำระเงิน' : 'ดูช่องทางการชำระเงินมัดจำ (500 บาท)'}
+                                    {showPaymentInfo ? 'ซ่อนช่องทางการชำระเงิน' : paymentSettings.bookingDepositToggleLabel}
                                     <svg className={`chevron ${showPaymentInfo ? 'up' : 'down'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
                                 </button>
                                 
                                 {showPaymentInfo && (
                                     <div className="payment-info-box fade-in">
                                         <div className="payment-method">
-                                            <div className="bank-icon kbank">K</div>
+                                            <div className="bank-icon kbank">
+                                                {paymentSettings.bookingPaymentBankIconImage ? (
+                                                    <img
+                                                        src={resolveAssetUrl(paymentSettings.bookingPaymentBankIconImage)}
+                                                        alt={paymentSettings.bookingPaymentBankLabel || 'Bank Logo'}
+                                                    />
+                                                ) : (
+                                                    (paymentSettings.bookingPaymentBankIconText || 'K')
+                                                )}
+                                            </div>
                                             <div className="payment-details">
-                                                <span className="payment-title">ธนาคารกสิกรไทย (KBank)</span>
-                                                <span className="payment-acc">012-3-45678-9</span>
-                                                <span className="payment-name">ชื่อบัญชี: หอพักนรสิงห์</span>
+                                                <span className="payment-title">{paymentSettings.bookingPaymentBankLabel}</span>
+                                                <span className="payment-acc">{paymentSettings.bookingPaymentBankAccount}</span>
+                                                <span className="payment-name">ชื่อบัญชี: {paymentSettings.bookingPaymentBankAccountName}</span>
                                             </div>
                                         </div>
                                         <div className="payment-divider"></div>
                                         <div className="payment-method promptpay-method">
                                             <div className="payment-details promptpay-details">
-                                                <span className="payment-title">พร้อมเพย์ (PromptPay) QR Code</span>
-                                                {/* ใส่ Path รูปภาพ QR Code ตรงนี้ */}
-                                                <img src="/qr-promptpay.png" alt="QR Code PromptPay" className="promptpay-qr-img" />
-                                                <span className="payment-name">ชื่อ-สกุล: นายนรสิงห์ ใจดี</span>
+                                                <span className="payment-title">{paymentSettings.bookingPromptpayTitle}</span>
+                                                <img src={resolveAssetUrl(paymentSettings.bookingPromptpayImage)} alt="QR Code PromptPay" className="promptpay-qr-img" />
+                                                <span className="payment-name">ชื่อ-สกุล: {paymentSettings.bookingPromptpayName}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -200,7 +251,7 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
 
                             {/* Deposit Slip Upload */}
                             <div className="booking-field full-width">
-                                <label>สลิปโอนเงินมัดจำ 500 บาท <span className="required">*</span></label>
+                                <label>{paymentSettings.bookingDepositSlipLabel} <span className="required">*</span></label>
                                 <div className="slip-upload-area">
                                     {slipPreview ? (
                                         <div className="slip-preview">
@@ -231,7 +282,7 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
                                 </div>
                                 <p className="slip-note">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
-                                    ค่ามัดจำ 500 บาท จะถูกหักจากค่าเช่าเดือนแรก
+                                    {paymentSettings.bookingDepositNote}
                                 </p>
                             </div>
 

@@ -6,6 +6,16 @@
 const API_BASE = 'http://localhost:5000/api'; // Development
 // const API_BASE = 'https://narasing-billing-backend.onrender.com/api'; // Production
 
+export const BACKEND_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
+
+export function resolveAssetUrl(maybePath) {
+    if (!maybePath) return '';
+    if (typeof maybePath !== 'string') return '';
+    // If backend returns /uploads/..., it must be loaded from backend origin (not Vite origin)
+    if (maybePath.startsWith('/uploads/')) return `${BACKEND_ORIGIN}${maybePath}`;
+    return maybePath;
+}
+
 async function request(url, options = {}) {
     const res = await fetch(`${API_BASE}${url}`, {
         headers: { 'Content-Type': 'application/json' },
@@ -101,6 +111,25 @@ export const settingsAPI = {
         method: 'PUT',
         body: JSON.stringify(rates)
     })
+};
+
+// ========== UPLOADS API ==========
+
+export const uploadsAPI = {
+    uploadSettingsImage: async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch(`${API_BASE}/uploads/settings-image`, {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.error || 'อัปโหลดไฟล์ไม่สำเร็จ');
+        }
+        return data;
+    }
 };
 
 // ========== BOOKING API ==========

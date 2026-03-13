@@ -44,6 +44,20 @@ settingsSchema.statics.defaults = {
     electricRate: 8,
     roomRent: 0,
 
+    // Booking / Deposit Settings
+    bookingDepositAmount: 500,
+    bookingDepositToggleLabel: 'ดูช่องทางการชำระเงินมัดจำ (500 บาท)',
+    bookingDepositSlipLabel: 'สลิปโอนเงินมัดจำ 500 บาท',
+    bookingDepositNote: 'ค่ามัดจำ 500 บาท จะถูกหักจากค่าเช่าเดือนแรก',
+    bookingPaymentBankLabel: 'ธนาคารกสิกรไทย (KBank)',
+    bookingPaymentBankAccount: '012-3-45678-9',
+    bookingPaymentBankAccountName: 'หอพักนรสิงห์',
+    bookingPaymentBankIconText: 'K',
+    bookingPaymentBankIconImage: '',
+    bookingPromptpayTitle: 'พร้อมเพย์ (PromptPay) QR Code',
+    bookingPromptpayImage: '/qr-promptpay.png',
+    bookingPromptpayName: 'นายนรสิงห์ ใจดี',
+    
     // Amenities options
     roomAmenities: [
         { id: 'aircon', label: 'แอร์', icon: '❄️' },

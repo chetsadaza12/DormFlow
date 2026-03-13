@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { settingsAPI } from '../../services/api';
+import { settingsAPI, uploadsAPI, resolveAssetUrl } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
 import MapPicker from './MapPicker';
 import './GeneralSettings.css';
@@ -14,6 +14,7 @@ export default function GeneralSettings() {
     const [showIconPicker, setShowIconPicker] = useState(false);
     const [activeFacilityIndex, setActiveFacilityIndex] = useState(null);
     const [showMapPicker, setShowMapPicker] = useState(false);
+    const [uploadingKey, setUploadingKey] = useState(null);
 
     // List of available icons in the public/assets/images folder
     const availableIcons = [
@@ -67,6 +68,22 @@ export default function GeneralSettings() {
             showToast('บันทึกการตั้งค่าเรียบร้อยแล้ว', 'success');
         } catch (error) {
             showToast(error.message || 'เกิดข้อผิดพลาดในการบันทึกการตั้งค่า', 'error');
+        }
+    }
+
+    async function handleImageUpload(fieldKey, file) {
+        if (!file) return;
+        try {
+            setUploadingKey(fieldKey);
+            const result = await uploadsAPI.uploadSettingsImage(file);
+            if (result.path) {
+                handleChange(fieldKey, result.path);
+                showToast('อัปโหลดรูปภาพเรียบร้อยแล้ว', 'success');
+            }
+        } catch (error) {
+            showToast(error.message || 'อัปโหลดรูปภาพไม่สำเร็จ', 'error');
+        } finally {
+            setUploadingKey(null);
         }
     }
 
@@ -220,6 +237,95 @@ export default function GeneralSettings() {
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" /></svg>
                 }
             ]
+        },
+        {
+            title: 'ตั้งค่าการจอง (มัดจำ)',
+            fields: [
+                {
+                    key: 'bookingDepositAmount',
+                    label: 'จำนวนเงินมัดจำ (บาท)',
+                    description: 'จำนวนเงินที่ใช้เป็นค่ามัดจำในการจองห้อง (ตัวเลขบาท)',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg>
+                },
+                {
+                    key: 'bookingDepositToggleLabel',
+                    label: 'ข้อความปุ่มแสดงช่องทางชำระเงิน',
+                    description: 'ข้อความบนปุ่ม เช่น "ดูช่องทางการชำระเงินมัดจำ (500 บาท)"',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M8 12h8" /></svg>
+                },
+                {
+                    key: 'bookingDepositSlipLabel',
+                    label: 'ข้อความหัวข้อสลิปโอน',
+                    description: 'เช่น "สลิปโอนเงินมัดจำ 500 บาท"',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h9l5 5v11a2 2 0 01-2 2z" /></svg>
+                },
+                {
+                    key: 'bookingDepositNote',
+                    label: 'หมายเหตุค่ามัดจำ',
+                    description: 'ข้อความอธิบายใต้ช่องสลิป เช่น "ค่ามัดจำ 500 บาท จะถูกหักจากค่าเช่าเดือนแรก"',
+                    type: 'textarea',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+                },
+                {
+                    key: 'bookingPaymentBankLabel',
+                    label: 'ชื่อธนาคาร / ประเภทบัญชี',
+                    description: 'เช่น "ธนาคารกสิกรไทย (KBank)"',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18" /></svg>
+                },
+                {
+                    key: 'bookingPaymentBankAccount',
+                    label: 'เลขที่บัญชีธนาคาร',
+                    description: 'เช่น "012-3-45678-9"',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /></svg>
+                },
+                {
+                    key: 'bookingPaymentBankAccountName',
+                    label: 'ชื่อบัญชีธนาคาร',
+                    description: 'เช่น "หอพักนรสิงห์"',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4" /><path d="M6 20v-1a4 4 0 014-4h4a4 4 0 014 4v1" /></svg>
+                },
+                {
+                    key: 'bookingPaymentBankIconText',
+                    label: 'ตัวอักษรบนไอคอนธนาคาร',
+                    description: 'ตัวอักษรที่แสดงในกล่องสีของธนาคาร เช่น K, S, T',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="4" /><path d="M10 8h4l-4 8h4" /></svg>
+                },
+                {
+                    key: 'bookingPaymentBankIconImage',
+                    label: 'ที่อยู่รูปโลโก้ธนาคาร',
+                    description: 'หากต้องการใช้โลโก้จริง ให้ใส่ path รูป เช่น "/assets/images/kbank-logo.png" (ถ้าเว้นว่างจะใช้ตัวอักษรแทน)',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="14" rx="2" /><circle cx="8.5" cy="10.5" r="1.5" /><path d="M21 15l-5-4-3 3-2-2-4 3" /></svg>
+                },
+                {
+                    key: 'bookingPromptpayTitle',
+                    label: 'หัวข้อ PromptPay',
+                    description: 'เช่น "พร้อมเพย์ (PromptPay) QR Code"',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
+                },
+                {
+                    key: 'bookingPromptpayImage',
+                    label: 'ที่อยู่รูป QR Code',
+                    description: 'เช่น "/qr-promptpay.png" หรือ path อื่นใน public',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="14" rx="2" /><circle cx="8.5" cy="10.5" r="1.5" /><path d="M21 15l-5-4-3 3-2-2-4 3" /></svg>
+                },
+                {
+                    key: 'bookingPromptpayName',
+                    label: 'ชื่อเจ้าของ PromptPay',
+                    description: 'เช่น "นายนรสิงห์ ใจดี"',
+                    type: 'text',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="7" r="4" /><path d="M5.5 21a6.5 6.5 0 0113 0" /></svg>
+                }
+            ]
         }
     ];
 
@@ -295,12 +401,40 @@ export default function GeneralSettings() {
                                             </button>
                                         </div>
                                     ) : (
-                                        <input
-                                            type="text"
-                                            className="input setting-input"
-                                            value={settings[field.key] !== undefined ? settings[field.key] : ''}
-                                            onChange={e => handleChange(field.key, e.target.value)}
-                                        />
+                                        <>
+                                            <input
+                                                type="text"
+                                                className="input setting-input"
+                                                value={settings[field.key] !== undefined ? settings[field.key] : ''}
+                                                onChange={e => handleChange(field.key, e.target.value)}
+                                            />
+                                            {(field.key === 'bookingPaymentBankIconImage' || field.key === 'bookingPromptpayImage') && (
+                                                <div className="setting-upload-row">
+                                                    <label className="upload-btn">
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            style={{ display: 'none' }}
+                                                            onChange={e => handleImageUpload(field.key, e.target.files[0])}
+                                                        />
+                                                        {uploadingKey === field.key ? 'กำลังอัปโหลด...' : 'อัปโหลดรูปจากเครื่อง'}
+                                                    </label>
+                                                    {settings[field.key] && (
+                                                        <div className="upload-preview">
+                                                            <div className="upload-preview-thumb">
+                                                                <img src={resolveAssetUrl(settings[field.key])} alt="preview" />
+                                                            </div>
+                                                            <div className="upload-preview-text">
+                                                                <span className="upload-preview-label">ใช้รูป:</span>
+                                                                <span className="upload-preview-name">
+                                                                    {settings[field.key].split('/').pop()}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             ))}
