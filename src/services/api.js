@@ -108,14 +108,35 @@ export const settingsAPI = {
 export const bookingAPI = {
     getAll: () => request('/bookings'),
 
-    create: (data) => request('/bookings', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    }),
+    create: async (data) => {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('phone', data.phone);
+        formData.append('lineId', data.lineId || '');
+        formData.append('roomNumber', data.roomNumber);
+        formData.append('moveInDate', data.moveInDate);
+        formData.append('message', data.message || '');
+        if (data.depositSlip) {
+            formData.append('depositSlip', data.depositSlip);
+        }
+
+        const res = await fetch(`${API_BASE}/bookings`, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'เกิดข้อผิดพลาด');
+        return result;
+    },
 
     updateStatus: (id, status) => request(`/bookings/${id}/status`, {
         method: 'PUT',
         body: JSON.stringify({ status })
+    }),
+
+    verifyDeposit: (id, verified) => request(`/bookings/${id}/verify-deposit`, {
+        method: 'PUT',
+        body: JSON.stringify({ verified })
     }),
 
     delete: (id) => request(`/bookings/${id}`, {

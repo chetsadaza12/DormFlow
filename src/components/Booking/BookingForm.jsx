@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { bookingAPI } from '../../services/api';
 import './BookingForm.css';
 
@@ -11,12 +11,35 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
         moveInDate: '',
         message: ''
     });
+    const [slipFile, setSlipFile] = useState(null);
+    const [slipPreview, setSlipPreview] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
+    const fileInputRef = useRef(null);
 
     function handleChange(e) {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    }
+
+    function handleSlipChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError('ไฟล์ต้องมีขนาดไม่เกิน 5MB');
+            return;
+        }
+
+        setSlipFile(file);
+        setSlipPreview(URL.createObjectURL(file));
+        setError('');
+    }
+
+    function removeSlip() {
+        setSlipFile(null);
+        setSlipPreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
     }
 
     async function handleSubmit(e) {
@@ -28,11 +51,21 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
             return;
         }
 
+        if (!formData.moveInDate) {
+            setError('กรุณาระบุวันที่ต้องการเข้าอยู่');
+            return;
+        }
+
+        if (!slipFile) {
+            setError('กรุณาแนบสลิปโอนเงินมัดจำ 500 บาท');
+            return;
+        }
+
         try {
             setIsSubmitting(true);
             await bookingAPI.create({
                 ...formData,
-                moveInDate: formData.moveInDate || null
+                depositSlip: slipFile
             });
             setSubmitted(true);
             if (onSuccess) onSuccess();
@@ -50,15 +83,19 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
 
                 {submitted ? (
                     <div className="booking-success">
-                        <div className="success-icon">🎉</div>
+                        <div className="success-icon-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                        </div>
                         <h2>ส่งข้อมูลเรียบร้อย!</h2>
-                        <p>ขอบคุณที่สนใจจองห้องพัก เราจะติดต่อกลับโดยเร็วที่สุดครับ</p>
+                        <p>ขอบคุณที่สนใจจองห้องพัก เราจะตรวจสอบสลิปและติดต่อกลับโดยเร็วที่สุดครับ</p>
                         <button className="booking-done-btn" onClick={onClose}>ปิด</button>
                     </div>
                 ) : (
                     <>
                         <div className="booking-header">
-                            <div className="booking-header-icon">📋</div>
+                            <div className="booking-header-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" /><rect x="8" y="2" width="8" height="4" rx="1" ry="1" /></svg>
+                            </div>
                             <h2>จองห้องพัก</h2>
                             <p>ห้อง <strong>{formData.roomNumber}</strong></p>
                         </div>
@@ -102,12 +139,13 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
                             </div>
 
                             <div className="booking-field">
-                                <label>วันที่ต้องการเข้าอยู่</label>
+                                <label>วันที่ต้องการเข้าอยู่ <span className="required">*</span></label>
                                 <input
                                     type="date"
                                     name="moveInDate"
                                     value={formData.moveInDate}
                                     onChange={handleChange}
+                                    required
                                 />
                             </div>
 
@@ -120,6 +158,43 @@ export default function BookingForm({ roomNumber, onClose, onSuccess }) {
                                     placeholder="มีอะไรอยากสอบถามเพิ่มเติม..."
                                     rows={3}
                                 />
+                            </div>
+
+                            {/* Deposit Slip Upload */}
+                            <div className="booking-field full-width">
+                                <label>สลิปโอนเงินมัดจำ 500 บาท <span className="required">*</span></label>
+                                <div className="slip-upload-area">
+                                    {slipPreview ? (
+                                        <div className="slip-preview">
+                                            <img src={slipPreview} alt="สลิปโอนเงิน" />
+                                            <button type="button" className="slip-remove-btn" onClick={removeSlip}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label className="slip-dropzone" htmlFor="slipInput">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                                <polyline points="17 8 12 3 7 8" />
+                                                <line x1="12" y1="3" x2="12" y2="15" />
+                                            </svg>
+                                            <span className="slip-dropzone-text">คลิกเพื่ออัปโหลดสลิป</span>
+                                            <span className="slip-dropzone-hint">JPG, PNG, WEBP (ไม่เกิน 5MB)</span>
+                                        </label>
+                                    )}
+                                    <input
+                                        ref={fileInputRef}
+                                        id="slipInput"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleSlipChange}
+                                        style={{ display: 'none' }}
+                                    />
+                                </div>
+                                <p className="slip-note">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+                                    ค่ามัดจำ 500 บาท จะถูกหักจากค่าเช่าเดือนแรก
+                                </p>
                             </div>
 
                             <button 

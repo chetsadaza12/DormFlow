@@ -19,11 +19,23 @@ const bookingSchema = new mongoose.Schema({
     },
     moveInDate: {
         type: Date,
-        default: null
+        required: [true, 'กรุณาระบุวันที่ต้องการเข้าอยู่']
     },
     message: {
         type: String,
         default: ''
+    },
+    depositSlip: {
+        type: String,
+        default: ''
+    },
+    depositAmount: {
+        type: Number,
+        default: 500
+    },
+    depositVerified: {
+        type: Boolean,
+        default: false
     },
     status: {
         type: String,

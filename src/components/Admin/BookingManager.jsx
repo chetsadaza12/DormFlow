@@ -9,12 +9,15 @@ const STATUS_MAP = {
     rejected: { label: 'ปฏิเสธ', color: '#f87171', bg: 'rgba(239, 68, 68, 0.12)' }
 };
 
+const API_HOST = 'http://localhost:5000';
+
 export default function BookingManager() {
     const [bookings, setBookings] = useState([]);
-    const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
+    const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0, depositVerified: 0, depositPending: 0 });
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [viewingSlip, setViewingSlip] = useState(null);
     const { showToast, showConfirm } = useNotification();
 
     useEffect(() => { loadData(); }, []);
@@ -46,6 +49,20 @@ export default function BookingManager() {
             loadData();
         } catch (err) {
             showToast('ไม่สามารถอัพเดทสถานะได้', 'error');
+        }
+    }
+
+    async function handleVerifyDeposit(id, verified) {
+        const msg = verified ? 'ยืนยันว่ามัดจำเข้าแล้ว?' : 'ยกเลิกการยืนยันมัดจำ?';
+        const confirmed = await showConfirm(msg);
+        if (!confirmed) return;
+
+        try {
+            await bookingAPI.verifyDeposit(id, verified);
+            showToast(verified ? 'ยืนยันมัดจำสำเร็จ' : 'ยกเลิกการยืนยันมัดจำ', 'success');
+            loadData();
+        } catch (err) {
+            showToast('ไม่สามารถอัพเดทสถานะมัดจำได้', 'error');
         }
     }
 
@@ -200,6 +217,39 @@ export default function BookingManager() {
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                                         <span>จองเมื่อ: {formatDateTime(booking.createdAt)}</span>
                                     </div>
+
+                                    {/* Deposit Section */}
+                                    <div className="bm-deposit-section">
+                                        <div className="bm-deposit-header">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+                                            <span>มัดจำ ฿{booking.depositAmount || 500}</span>
+                                            <span className={`bm-deposit-badge ${booking.depositVerified ? 'verified' : 'unverified'}`}>
+                                                {booking.depositVerified ? '✓ เข้าแล้ว' : '⏳ รอตรวจสอบ'}
+                                            </span>
+                                        </div>
+                                        {booking.depositSlip ? (
+                                            <div className="bm-slip-thumbnail" onClick={() => setViewingSlip(`${API_HOST}${booking.depositSlip}`)}>
+                                                <img src={`${API_HOST}${booking.depositSlip}`} alt="สลิป" />
+                                                <div className="bm-slip-overlay">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
+                                                    ดูสลิป
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="bm-no-slip">ไม่มีสลิป</div>
+                                        )}
+                                        {booking.depositSlip && !booking.depositVerified && (
+                                            <button className="bm-verify-btn" onClick={() => handleVerifyDeposit(booking._id, true)}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                                                ยืนยันมัดจำเข้าแล้ว
+                                            </button>
+                                        )}
+                                        {booking.depositVerified && (
+                                            <button className="bm-unverify-btn" onClick={() => handleVerifyDeposit(booking._id, false)}>
+                                                ยกเลิกการยืนยัน
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="bm-card-actions">
@@ -229,6 +279,18 @@ export default function BookingManager() {
                             </div>
                         );
                     })}
+                </div>
+            )}
+
+            {/* Slip Lightbox */}
+            {viewingSlip && (
+                <div className="bm-slip-lightbox" onClick={() => setViewingSlip(null)}>
+                    <div className="bm-slip-lightbox-content" onClick={e => e.stopPropagation()}>
+                        <button className="bm-slip-lightbox-close" onClick={() => setViewingSlip(null)}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                        </button>
+                        <img src={viewingSlip} alt="สลิปโอนเงิน" />
+                    </div>
                 </div>
             )}
         </div>
