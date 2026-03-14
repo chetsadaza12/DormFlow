@@ -30,12 +30,24 @@ export function NotificationProvider({ children }) {
     }, []);
 
     // --- Confirm Methods ---
+    // รองรับ 2 รูปแบบ: showConfirm(msg) คืน Promise<boolean> หรือ showConfirm(msg, onConfirm, onCancel)
     const showConfirm = useCallback((message, onConfirm, onCancel = null) => {
-        setConfirmState({
-            isOpen: true,
-            message,
-            onConfirm,
-            onCancel
+        if (typeof onConfirm === 'function') {
+            setConfirmState({
+                isOpen: true,
+                message,
+                onConfirm,
+                onCancel
+            });
+            return Promise.resolve(false);
+        }
+        return new Promise(resolve => {
+            setConfirmState({
+                isOpen: true,
+                message,
+                onConfirm: () => { resolve(true); },
+                onCancel: () => { resolve(false); }
+            });
         });
     }, []);
 

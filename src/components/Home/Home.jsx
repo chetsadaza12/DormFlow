@@ -198,16 +198,8 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                                                         <div className="occupied-state">
                                                             <div className="occupied-icon">🔒</div>
                                                             <p>ห้องนี้มีผู้เช่าแล้ว</p>
-                                                            {(room.tenantName || room.tenantPhone || room.tenantLineId) && (
-                                                                <div className="occupied-tenant-info">
-                                                                    {room.tenantName && <span className="tenant-name">{room.tenantName}</span>}
-                                                                    {room.tenantPhone && (
-                                                                        <a href={`tel:${room.tenantPhone}`} className="tenant-phone">{room.tenantPhone}</a>
-                                                                    )}
-                                                                    {room.tenantLineId && (
-                                                                        <a href={`https://line.me/R/ti/p/@${room.tenantLineId.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="tenant-line">LINE: {room.tenantLineId}</a>
-                                                                    )}
-                                                                </div>
+                                                            {room.tenantName && (
+                                                                <span className="tenant-name-only">{room.tenantName}</span>
                                                             )}
                                                         </div>
                                                     )}
