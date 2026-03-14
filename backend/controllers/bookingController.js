@@ -1,4 +1,5 @@
 import Booking from '../models/Booking.js';
+import Room from '../models/Room.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -47,7 +48,7 @@ export const create = async (req, res) => {
     }
 };
 
-// PUT /api/bookings/:id/status — อัพเดทสถานะ
+// PUT /api/bookings/:id/status — อัพเดทสถานะ (อนุมัติแล้วจะใส่ข้อมูลผู้จองลงห้อง)
 export const updateStatus = async (req, res) => {
     try {
         const { status } = req.body;
@@ -60,6 +61,23 @@ export const updateStatus = async (req, res) => {
             { new: true }
         );
         if (!booking) return res.status(404).json({ error: 'ไม่พบการจองนี้' });
+
+        if (status === 'approved' && booking.roomNumber) {
+            const room = await Room.findOne({ roomNumber: String(booking.roomNumber).trim() });
+            if (room) {
+                await Room.findOneAndUpdate(
+                    { roomNumber: room.roomNumber },
+                    {
+                        isOccupied: true,
+                        tenantName: booking.name || '',
+                        tenantPhone: booking.phone || '',
+                        tenantLineId: booking.lineId || ''
+                    },
+                    { new: true }
+                );
+            }
+        }
+
         res.json(booking);
     } catch (err) {
         res.status(500).json({ error: 'ไม่สามารถอัพเดทสถานะได้' });

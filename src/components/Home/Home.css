@@ -550,6 +550,32 @@ section h2::after {
     font-weight: 700;
 }
 
+.occupied-tenant-info {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: #334155;
+}
+
+.occupied-tenant-info .tenant-name {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.occupied-tenant-info .tenant-phone,
+.occupied-tenant-info .tenant-line {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.occupied-tenant-info .tenant-phone:hover,
+.occupied-tenant-info .tenant-line:hover {
+    text-decoration: underline;
+}
+
 /* ============ Contact & Map Section - Premium ============ */
 .contact-map-section {
     max-width: 100% !important;

@@ -12,6 +12,16 @@ const roomSchema = new mongoose.Schema({
         default: '',
         trim: true
     },
+    tenantPhone: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    tenantLineId: {
+        type: String,
+        default: '',
+        trim: true
+    },
     lastWaterMeter: {
         type: Number,
         default: 0

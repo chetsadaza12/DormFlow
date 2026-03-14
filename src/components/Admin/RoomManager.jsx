@@ -9,8 +9,8 @@ export default function RoomManager() {
     const [showModal, setShowModal] = useState(false);
     const [editingRoom, setEditingRoom] = useState(null);
     const [formData, setFormData] = useState({
-        roomNumber: '', tenantName: '', lastWaterMeter: 0,
-        lastElectricMeter: 0, waterRate: 18, electricRate: 8,
+        roomNumber: '', tenantName: '', tenantPhone: '', tenantLineId: '',
+        lastWaterMeter: 0, lastElectricMeter: 0, waterRate: 18, electricRate: 8,
         roomRent: 0, isOccupied: true, amenities: ['aircon', 'bed', 'waterheater', 'wifi']
     });
     const [error, setError] = useState('');
@@ -54,8 +54,8 @@ export default function RoomManager() {
             const rates = await settingsAPI.getRates();
             setEditingRoom(null);
             setFormData({
-                roomNumber: '', tenantName: '', lastWaterMeter: 0,
-                lastElectricMeter: 0, waterRate: rates.waterRate, electricRate: rates.electricRate,
+                roomNumber: '', tenantName: '', tenantPhone: '', tenantLineId: '',
+                lastWaterMeter: 0, lastElectricMeter: 0, waterRate: rates.waterRate, electricRate: rates.electricRate,
                 roomRent: 0, isOccupied: true, amenities: ['aircon', 'bed', 'waterheater', 'wifi']
             });
             setError('');
@@ -295,8 +295,18 @@ export default function RoomManager() {
                                 </div>
                                 <div className="form-group">
                                     <label>ชื่อผู้เช่า</label>
-                                    <input type="text" className="input" value={formData.tenantName}
+                                    <input type="text" className="input" value={formData.tenantName || ''}
                                         onChange={e => handleChange('tenantName', e.target.value)} />
+                                </div>
+                                <div className="form-group">
+                                    <label>เบอร์โทรศัพท์ผู้เช่า</label>
+                                    <input type="text" className="input" value={formData.tenantPhone || ''}
+                                        onChange={e => handleChange('tenantPhone', e.target.value)} placeholder="0XX-XXX-XXXX" />
+                                </div>
+                                <div className="form-group">
+                                    <label>LINE ID ผู้เช่า</label>
+                                    <input type="text" className="input" value={formData.tenantLineId || ''}
+                                        onChange={e => handleChange('tenantLineId', e.target.value)} placeholder="LINE ID (ถ้ามี)" />
                                 </div>
                                 <div className="form-group">
                                     <label>เลขมิเตอร์น้ำ</label>
