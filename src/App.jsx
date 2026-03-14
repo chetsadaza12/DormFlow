@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useBilling } from './hooks/useBilling';
+import LineCallbackPage from './components/Auth/LineCallbackPage';
 import Header from './components/Header/Header';
 import RoomSearch from './components/RoomSearch/RoomSearch';
 import BillingForm from './components/BillingForm/BillingForm';
@@ -34,6 +35,15 @@ function App() {
 
     const [showPrint, setShowPrint] = useState(false);
     const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'billing' | 'admin'
+    const [isLineCallback, setIsLineCallback] = useState(false);
+
+    useEffect(() => {
+        setIsLineCallback(window.location.pathname === '/line-callback');
+    }, []);
+
+    if (isLineCallback) {
+        return <LineCallbackPage />;
+    }
 
     function handlePrint() {
         if (!isBillSaved) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { roomAPI, settingsAPI } from '../../services/api';
 import BookingForm from '../Booking/BookingForm';
+import { STORAGE_KEY_DRAFT, STORAGE_KEY_LINE } from '../Auth/LineCallbackPage';
 import './Home.css';
 
 const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
@@ -75,6 +76,32 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
         };
 
         fetchData();
+    }, []);
+
+    const [lineCallbackRoom, setLineCallbackRoom] = useState(null);
+    const [lineCallbackLineId, setLineCallbackLineId] = useState('');
+    const [lineCallbackDraft, setLineCallbackDraft] = useState(null);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('lineCallback') === '1') {
+            try {
+                const lineId = sessionStorage.getItem(STORAGE_KEY_LINE) || '';
+                const draftRaw = sessionStorage.getItem(STORAGE_KEY_DRAFT);
+                let draft = null;
+                if (draftRaw) {
+                    draft = JSON.parse(draftRaw);
+                    sessionStorage.removeItem(STORAGE_KEY_DRAFT);
+                }
+                sessionStorage.removeItem(STORAGE_KEY_LINE);
+                const room = params.get('room') || (draft?.roomNumber ?? '');
+                setLineCallbackLineId(lineId);
+                setLineCallbackDraft(draft);
+                setLineCallbackRoom(room);
+                setBookingRoom(room);
+                window.history.replaceState({}, '', window.location.pathname);
+            } catch (e) {}
+        }
     }, []);
 
     return (
@@ -275,8 +302,10 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
             {bookingRoom && (
                 <BookingForm
                     roomNumber={bookingRoom}
-                    onClose={() => setBookingRoom(null)}
+                    onClose={() => { setBookingRoom(null); setLineCallbackRoom(null); setLineCallbackLineId(''); setLineCallbackDraft(null); }}
                     onSuccess={() => {}}
+                    initialLineId={lineCallbackRoom ? lineCallbackLineId : undefined}
+                    initialDraft={lineCallbackRoom ? lineCallbackDraft : undefined}
                 />
             )}
         </div>

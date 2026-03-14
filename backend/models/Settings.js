@@ -57,6 +57,7 @@ settingsSchema.statics.defaults = {
     bookingPromptpayTitle: 'พร้อมเพย์ (PromptPay) QR Code',
     bookingPromptpayImage: '/qr-promptpay.png',
     bookingPromptpayName: 'นายนรสิงห์ ใจดี',
+    bookingLineLoginClientId: '',
     
     // Amenities options
     roomAmenities: [

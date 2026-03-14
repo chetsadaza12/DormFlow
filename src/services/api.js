@@ -110,6 +110,15 @@ export const settingsAPI = {
     })
 };
 
+// ========== AUTH API ==========
+
+export const authAPI = {
+    lineToken: (code, redirectUri, clientId) => request('/auth/line-token', {
+        method: 'POST',
+        body: JSON.stringify({ code, redirectUri, clientId })
+    })
+};
+
 // ========== UPLOADS API ==========
 
 export const uploadsAPI = {

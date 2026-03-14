@@ -2,6 +2,7 @@ import Booking from '../models/Booking.js';
 import Room from '../models/Room.js';
 import path from 'path';
 import fs from 'fs';
+import { sendLineNotification } from '../services/lineService.js';
 
 // GET /api/bookings — ดึงรายการจองทั้งหมด
 export const getAll = async (req, res) => {
@@ -78,6 +79,30 @@ export const updateStatus = async (req, res) => {
             }
         }
 
+        // LINE notifications by status
+        if (booking.lineId) {
+            try {
+                if (status === 'approved') {
+                    await sendLineNotification(
+                        booking.lineId,
+                        `การจองห้อง ${booking.roomNumber} ของคุณได้รับการอนุมัติแล้ว\nวันเข้าพัก: ${booking.moveInDate || '-'}`
+                    );
+                } else if (status === 'rejected') {
+                    await sendLineNotification(
+                        booking.lineId,
+                        `ขออภัย การจองห้อง ${booking.roomNumber} ของคุณไม่ได้รับการอนุมัติ`
+                    );
+                } else if (status === 'pending') {
+                    await sendLineNotification(
+                        booking.lineId,
+                        `การจองห้อง ${booking.roomNumber} ของคุณถูกเปลี่ยนสถานะเป็น \"รอดำเนินการ\"`
+                    );
+                }
+            } catch (err) {
+                console.error('LINE notify (status) error:', err);
+            }
+        }
+
         res.json(booking);
     } catch (err) {
         res.status(500).json({ error: 'ไม่สามารถอัพเดทสถานะได้' });
@@ -94,6 +119,25 @@ export const verifyDeposit = async (req, res) => {
             { new: true }
         );
         if (!booking) return res.status(404).json({ error: 'ไม่พบการจองนี้' });
+
+        if (booking.lineId) {
+            try {
+                if (verified) {
+                    await sendLineNotification(
+                        booking.lineId,
+                        `หอพักได้ยืนยันว่ามัดจำของคุณสำหรับห้อง ${booking.roomNumber} เข้าระบบเรียบร้อยแล้ว ขอบคุณครับ`
+                    );
+                } else {
+                    await sendLineNotification(
+                        booking.lineId,
+                        `สถานะยืนยันมัดจำสำหรับห้อง ${booking.roomNumber} ถูกยกเลิก หากสงสัยกรุณาติดต่อหอพัก`
+                    );
+                }
+            } catch (err) {
+                console.error('LINE notify (deposit) error:', err);
+            }
+        }
+
         res.json(booking);
     } catch (err) {
         res.status(500).json({ error: 'ไม่สามารถอัพเดทสถานะมัดจำได้' });
@@ -111,6 +155,17 @@ export const deleteBooking = async (req, res) => {
             const filePath = path.join(process.cwd(), booking.depositSlip);
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath);
+            }
+        }
+
+        if (booking.lineId) {
+            try {
+                await sendLineNotification(
+                    booking.lineId,
+                    `การจองห้อง ${booking.roomNumber} ของคุณถูกลบออกจากระบบแล้ว หากไม่ได้เป็นผู้ดำเนินการ โปรดติดต่อหอพัก`
+                );
+            } catch (err) {
+                console.error('LINE notify (delete) error:', err);
             }
         }
 
