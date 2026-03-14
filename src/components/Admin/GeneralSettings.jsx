@@ -300,7 +300,7 @@ export default function GeneralSettings() {
                 {
                     key: 'bookingPaymentBankIconImage',
                     label: 'ที่อยู่รูปโลโก้ธนาคาร',
-                    description: 'หากต้องการใช้โลโก้จริง ให้ใส่ path รูป เช่น "/assets/images/kbank-logo.png" (ถ้าเว้นว่างจะใช้ตัวอักษรแทน)',
+                    description: 'ใส่ path รูปในเว็บ หรือวางลิงก์รูปภาพ (URL) โดยตรง เช่น https://example.com/logo.png (ถ้าเว้นว่างจะใช้ตัวอักษรแทน)',
                     type: 'text',
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="14" rx="2" /><circle cx="8.5" cy="10.5" r="1.5" /><path d="M21 15l-5-4-3 3-2-2-4 3" /></svg>
                 },
@@ -314,7 +314,7 @@ export default function GeneralSettings() {
                 {
                     key: 'bookingPromptpayImage',
                     label: 'ที่อยู่รูป QR Code',
-                    description: 'เช่น "/qr-promptpay.png" หรือ path อื่นใน public',
+                    description: 'ใส่ path รูปในเว็บ หรือวางลิงก์รูปภาพ (URL) โดยตรง เช่น https://example.com/qr.png',
                     type: 'text',
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="14" rx="2" /><circle cx="8.5" cy="10.5" r="1.5" /><path d="M21 15l-5-4-3 3-2-2-4 3" /></svg>
                 },
@@ -407,6 +407,7 @@ export default function GeneralSettings() {
                                                 className="input setting-input"
                                                 value={settings[field.key] !== undefined ? settings[field.key] : ''}
                                                 onChange={e => handleChange(field.key, e.target.value)}
+                                                placeholder={(field.key === 'bookingPaymentBankIconImage' || field.key === 'bookingPromptpayImage') ? 'เช่น /path/to/image.png หรือ https://...' : undefined}
                                             />
                                             {(field.key === 'bookingPaymentBankIconImage' || field.key === 'bookingPromptpayImage') && (
                                                 <div className="setting-upload-row">
@@ -427,7 +428,7 @@ export default function GeneralSettings() {
                                                             <div className="upload-preview-text">
                                                                 <span className="upload-preview-label">ใช้รูป:</span>
                                                                 <span className="upload-preview-name">
-                                                                    {settings[field.key].split('/').pop()}
+                                                                    {settings[field.key].startsWith('http') ? 'ลิงก์รูปภาพ (URL)' : settings[field.key].split('/').pop()}
                                                                 </span>
                                                             </div>
                                                         </div>

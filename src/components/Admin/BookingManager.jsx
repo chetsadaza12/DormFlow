@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { bookingAPI } from '../../services/api';
+import { bookingAPI, resolveAssetUrl } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
 import './BookingManager.css';
 
@@ -8,8 +8,6 @@ const STATUS_MAP = {
     approved: { label: 'อนุมัติแล้ว', color: '#34d399', bg: 'rgba(16, 185, 129, 0.12)' },
     rejected: { label: 'ปฏิเสธ', color: '#f87171', bg: 'rgba(239, 68, 68, 0.12)' }
 };
-
-const API_HOST = 'http://localhost:5000';
 
 export default function BookingManager() {
     const [bookings, setBookings] = useState([]);
@@ -228,8 +226,8 @@ export default function BookingManager() {
                                             </span>
                                         </div>
                                         {booking.depositSlip ? (
-                                            <div className="bm-slip-thumbnail" onClick={() => setViewingSlip(`${API_HOST}${booking.depositSlip}`)}>
-                                                <img src={`${API_HOST}${booking.depositSlip}`} alt="สลิป" />
+                                            <div className="bm-slip-thumbnail" onClick={() => setViewingSlip(resolveAssetUrl(booking.depositSlip))}>
+                                                <img src={resolveAssetUrl(booking.depositSlip)} alt="สลิป" />
                                                 <div className="bm-slip-overlay">
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
                                                     ดูสลิป

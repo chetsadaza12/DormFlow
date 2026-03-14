@@ -1,11 +1,8 @@
 /**
  * API Service Layer
- * ตัวกลางเรียก Backend API แทน localStorage
+ * ตัวกลางเรียก Backend API — รองรับทั้ง local และ deploy ออนไลน์ ผ่าน VITE_API_URL
  */
-
-const API_BASE = 'http://localhost:5000/api'; // Development
-// const API_BASE = 'https://narasing-billing-backend.onrender.com/api'; // Production
-
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 export const BACKEND_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
 
 export function resolveAssetUrl(maybePath) {
