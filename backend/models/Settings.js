@@ -32,6 +32,8 @@ settingsSchema.statics.defaults = {
         { title: 'ฟรี Wi-Fi', description: 'อินเทอร์เน็ตความเร็วสูง ครอบคลุมทุกพื้นที่', icon: '/assets/images/Wi-Fi.gif' },
         { title: 'เฟอร์นิเจอร์ครบ', description: 'พร้อมเข้าอยู่ได้ทันที ไม่ต้องซื้อเพิ่ม', icon: '/assets/images/เฟอร์นิเจอร์ครบ.gif' }
     ],
+    // one URL per line, used in location popup gallery
+    homeLocationMediaUrls: '',
     
     // Billing Settings
     invoiceTitle: 'บิลค่าเช่าห้องแถว นรสิงห์',

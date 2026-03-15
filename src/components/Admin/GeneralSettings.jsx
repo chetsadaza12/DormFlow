@@ -202,6 +202,13 @@ export default function GeneralSettings() {
                     description: 'คลิกปุ่มด้านล่างเพื่อปักหมุดตำแหน่งที่ตั้งหอพักบนแผนที่',
                     type: 'map',
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                },
+                {
+                    key: 'homeLocationMediaUrls',
+                    label: 'รูป/วิดีโอสำหรับป็อปอัพสถานที่',
+                    description: 'ใส่ URL รูปหรือวิดีโอ (เช่น .jpg, .png, .mp4, .webm) 1 บรรทัดต่อ 1 ไฟล์ ลำดับจะใช้ตามบรรทัดที่กรอก',
+                    type: 'textarea',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="14" rx="2" /><circle cx="8.5" cy="9.5" r="1.5" /><path d="M21 17l-5-4-3 3-2-2-4 3" /></svg>
                 }
             ]
         },

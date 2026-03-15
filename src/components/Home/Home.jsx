@@ -4,6 +4,23 @@ import BookingForm from '../Booking/BookingForm';
 import { STORAGE_KEY_DRAFT, STORAGE_KEY_LINE } from '../Auth/LineCallbackPage';
 import './Home.css';
 
+const parseLocationMedia = (urlsString) => {
+    if (!urlsString || typeof urlsString !== 'string') return [];
+    const items = urlsString
+        .split(/\r?\n|,/)
+        .map(s => s.trim())
+        .filter(Boolean);
+    return items.map(src => {
+        const lower = src.toLowerCase();
+        const isVideo = /\.(mp4|webm|ogg)$/i.test(lower);
+        return {
+            type: isVideo ? 'video' : 'image',
+            src,
+            title: ''
+        };
+    });
+};
+
 const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
     const [allRooms, setAllRooms] = useState([]);
     const [availableAmenities, setAvailableAmenities] = useState([]);
@@ -23,6 +40,9 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
     const [error, setError] = useState(null);
     const [selectedFilter, setSelectedFilter] = useState(null); // null | 'all' | 'available' | 'occupied'
     const [bookingRoom, setBookingRoom] = useState(null); // room number for booking modal
+    const [showLocationModal, setShowLocationModal] = useState(false);
+    const [locationMediaIndex, setLocationMediaIndex] = useState(0);
+    const [locationMedia, setLocationMedia] = useState([]);
 
     const handleFilterClick = (filterType) => {
         setSelectedFilter(prev => prev === filterType ? null : filterType);
@@ -55,6 +75,9 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                     }
                     if (settingsObj.roomAmenities && Array.isArray(settingsObj.roomAmenities)) {
                         setAvailableAmenities(settingsObj.roomAmenities);
+                    }
+                    if (typeof settingsObj.homeLocationMediaUrls === 'string') {
+                        setLocationMedia(parseLocationMedia(settingsObj.homeLocationMediaUrls));
                     }
                 }
                 
@@ -179,6 +202,13 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                             <div className="room-grid-placeholder">
                                 <div className="placeholder-icon">👆</div>
                                 <p>คลิกเลือกประเภทห้องด้านบนเพื่อดูรายละเอียด</p>
+                                <button
+                                    type="button"
+                                    className="location-info-btn"
+                                    onClick={() => setShowLocationModal(true)}
+                                >
+                                    ดูที่ตั้งหอพักและรายละเอียดเพิ่มเติม
+                                </button>
                             </div>
                         ) : (
                             <div className="rooms-grid">
@@ -307,6 +337,94 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                     initialLineId={lineCallbackRoom ? lineCallbackLineId : undefined}
                     initialDraft={lineCallbackRoom ? lineCallbackDraft : undefined}
                 />
+            )}
+
+            {/* Location Detail Modal */}
+            {showLocationModal && (
+                <div className="location-modal-overlay" onClick={() => setShowLocationModal(false)}>
+                    <div className="location-modal" onClick={e => e.stopPropagation()}>
+                        <button className="location-modal-close" onClick={() => setShowLocationModal(false)}>
+                            ×
+                        </button>
+                        <div className="location-modal-header">
+                            <h3>ที่ตั้งหอพักและบรรยากาศโดยรอบ</h3>
+                            <p>ดูแผนที่ เส้นทาง และข้อมูลติดต่อของ {businessName}</p>
+                        </div>
+                        <div className="location-modal-body">
+                            <div className="location-modal-media">
+                                {locationMedia.length > 0 && (
+                                    <>
+                                        <div className="location-media-main">
+                                            {locationMedia[locationMediaIndex].type === 'video' ? (
+                                                <video
+                                                    key={locationMedia[locationMediaIndex].src}
+                                                    src={locationMedia[locationMediaIndex].src}
+                                                    controls
+                                                    className="location-media-element"
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={locationMedia[locationMediaIndex].src}
+                                                    alt={locationMedia[locationMediaIndex].title || 'ภาพหอพัก'}
+                                                    className="location-media-element"
+                                                />
+                                            )}
+                                            {locationMedia.length > 1 && (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        className="location-media-nav prev"
+                                                        onClick={() =>
+                                                            setLocationMediaIndex((locationMediaIndex - 1 + locationMedia.length) % locationMedia.length)
+                                                        }
+                                                    >
+                                                        ‹
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="location-media-nav next"
+                                                        onClick={() =>
+                                                            setLocationMediaIndex((locationMediaIndex + 1) % locationMedia.length)
+                                                        }
+                                                    >
+                                                        ›
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                        {locationMedia.length > 1 && (
+                                            <div className="location-media-thumbs">
+                                                {locationMedia.map((item, idx) => (
+                                                    <button
+                                                        key={item.src}
+                                                        type="button"
+                                                        className={`location-media-thumb ${idx === locationMediaIndex ? 'active' : ''}`}
+                                                        onClick={() => setLocationMediaIndex(idx)}
+                                                    >
+                                                        {item.type === 'video' ? (
+                                                            <span className="thumb-video-label">วีดีโอ</span>
+                                                        ) : (
+                                                            <img src={item.src} alt={item.title || 'ภาพ'} />
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            <div className="location-modal-info">
+                                <h4>ข้อมูลติดต่อ</h4>
+                                <p><strong>ชื่อหอพัก:</strong> {businessName}</p>
+                                <p><strong>โทรศัพท์:</strong> {homeContactPhone}</p>
+                                <p><strong>LINE:</strong> {homeContactLineId}</p>
+                                <p className="location-modal-note">
+                                    จากแผนที่สามารถดูเส้นทางมายังหอพักได้อย่างชัดเจน เหมาะสำหรับส่งให้ผู้เช่าใหม่ หรือใช้วางแผนเดินทางล่วงหน้า
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
