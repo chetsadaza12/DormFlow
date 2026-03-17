@@ -29,6 +29,7 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
     const [homeContactPhone, setHomeContactPhone] = useState('092-5152-870 โก้ / 082-508-8909 พอล');
     const [homeContactLineId, setHomeContactLineId] = useState('narasing.dorm');
     const [homeMapLocation, setHomeMapLocation] = useState({ lat: 14.8829, lng: 102.0196 });
+    const [homeLocationMapNote, setHomeLocationMapNote] = useState('จากแผนที่สามารถดูเส้นทางมายังหอพักได้อย่างชัดเจน เหมาะสำหรับส่งให้ผู้เช่าใหม่ หรือใช้วางแผนเดินทางล่วงหน้า');
     const [facilities, setFacilities] = useState([
         { title: 'ปลอดภัย 24 ชม.', description: 'รปภ. และกล้องวงจรปิด ทุกชั้น', icon: '/assets/images/ปลอดภัย 24 ชม..gif' },
         { title: 'ที่จอดรถ', description: 'กว้างขวาง ร่มรื่น เพียงพอต่อผู้เช่า', icon: '/assets/images/ที่จอดรถ.gif' },
@@ -70,6 +71,7 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                     if (settingsObj.homeContactPhone) setHomeContactPhone(settingsObj.homeContactPhone);
                     if (settingsObj.homeContactLineId) setHomeContactLineId(settingsObj.homeContactLineId);
                     if (settingsObj.homeMapLocation) setHomeMapLocation(settingsObj.homeMapLocation);
+                    if (settingsObj.homeLocationMapNote) setHomeLocationMapNote(settingsObj.homeLocationMapNote);
                     if (settingsObj.homeFacilities && Array.isArray(settingsObj.homeFacilities)) {
                         setFacilities(settingsObj.homeFacilities);
                     }
@@ -419,7 +421,7 @@ const Home = ({ onNavigateToBilling, onNavigateToAdmin }) => {
                                 <p><strong>โทรศัพท์:</strong> {homeContactPhone}</p>
                                 <p><strong>LINE:</strong> {homeContactLineId}</p>
                                 <p className="location-modal-note">
-                                    จากแผนที่สามารถดูเส้นทางมายังหอพักได้อย่างชัดเจน เหมาะสำหรับส่งให้ผู้เช่าใหม่ หรือใช้วางแผนเดินทางล่วงหน้า
+                                    {homeLocationMapNote}
                                 </p>
                             </div>
                         </div>

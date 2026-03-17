@@ -34,6 +34,7 @@ settingsSchema.statics.defaults = {
     ],
     // one URL per line, used in location popup gallery
     homeLocationMediaUrls: '',
+    homeLocationMapNote: 'จากแผนที่สามารถดูเส้นทางมายังหอพักได้อย่างชัดเจน เหมาะสำหรับส่งให้ผู้เช่าใหม่ หรือใช้วางแผนเดินทางล่วงหน้า',
     
     // Billing Settings
     invoiceTitle: 'บิลค่าเช่าห้องแถว นรสิงห์',

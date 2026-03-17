@@ -209,6 +209,13 @@ export default function GeneralSettings() {
                     description: 'ใส่ URL รูปหรือวิดีโอ (เช่น .jpg, .png, .mp4, .webm) 1 บรรทัดต่อ 1 ไฟล์ ลำดับจะใช้ตามบรรทัดที่กรอก',
                     type: 'textarea',
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="14" rx="2" /><circle cx="8.5" cy="9.5" r="1.5" /><path d="M21 17l-5-4-3 3-2-2-4 3" /></svg>
+                },
+                {
+                    key: 'homeLocationMapNote',
+                    label: 'ข้อความอธิบายข้อมูลติดต่อ (ป็อปอัพสถานที่)',
+                    description: 'ข้อความที่จะแสดงอยู่ด้านล่างสุดในหน้าต่างป็อปอัพข้อมูลติดต่อของหอพัก',
+                    type: 'textarea',
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 }
             ]
         },
